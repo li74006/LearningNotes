@@ -137,4 +137,25 @@ People[] public people;
  }
 ```
 
-### 2.6
+### 2.6 : Errors & Warnings
+
+一些建议~
+
+### 2.7 : Memory, Storage, & Calldata(Intro)
+
+> memroy 和 calldata 类型的变量，只是当某个函数被调用时，暂时的存储在内存中；memroy 存储的临时变量可以被修改，而 calldata 存储的临时变量不可以被修改。
+
+> storage 类型的变量即使在函数执行结束后也可以在函数外进行调用，存储的是可以被修改的永久变量。
+
+### 2.8 : Basic Solidity Mappings
+
+> Mapping（映射） : 是一种数据结构，其中的每一个值都对应着唯一的 key（键），其实就是键值对;当创建映射时，会首先把所有数据都初始化为 0。
+
+```sol
+
+mapping(string => uint256) public nameToFavoriteNumber;
+ function addPerson(string memory _name, unit256 _favoriteNumber) public {
+   people.push(People(_favoriteNumber, _name));
+   nameToFavoriteNumber[_name] = _favoriteNumber;
+ }
+```
