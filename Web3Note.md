@@ -35,3 +35,63 @@
 2. 将 Blcok、Nonce、Transaction 等结合，算出该块的哈希；
 3. 将一个块的 prev 块串联到上一块的哈希形成块链；
 4. 将块链形成多个 peer，保证去中心化。
+
+### 1.7 : Signing Transactions（签名交易）
+
+> DSA : Digital Signature Algorithm 数字签名算法
+
+> Public Key : Is derived from private key.Anyone can "see" it,and use it to verify that a transaction came from you
+
+> Singing a transaction : A "one way" process.Someone with a private key signs a transaction by their private key being hashed with their transaction data.Anyone can then verify this new transaction hash with your public key.
+
+### 1.8 GasⅡ - Block Rewards & EIP 1559
+
+EIP 1559 Explained : https://www.youtube.com/watch?v=MGemhK9t44Q
+
+### 1.9 High-Level Blcokchain Fundamentals
+
+> Nodes : A single instance in a decentralized network.
+
+> Consensus : Is the mechanism（机制） used to agree on the state of a blockchain.
+
+### 2.1 : Welcome to Remix!
+
+> Remix ID（集成开发环境） : https://remix.ethereum.org/
+
+### 2.2 : Setting Up Your First Contract
+
+```sol
+// SPDX-License-Identifier:  MIT
+// 上面一行内容是可选的，但不写的话有些编译器会出警告，它定义 是 license 和代码分享规则；MIT 是限制 License 最少的协议之一👆
+pragma solidity ^0.8.7; // pragma(编译指示；编译附注)；"^"表示任何比0.8.7高的版本都适合当前的代码
+pragma solidity >= 0.8.7 < 0.9.0; // 任何大于等于8.7，小于9.0的版本都适合当前代码
+
+contract SimpleStorage{
+
+} // 该标签告诉solidity后面是定义的合约
+
+```
+
+### 2.3 : Basic Solidity Types
+
+> Basic Types :
+>
+> - boolean : true / false
+> - unit : 表示无符号正整数,可以决定给变量分配多少 bits（Byte = 8 bit），默认是 256，也可以跟 8。[Bits vs Bytes as Fast As Possible](https://www.youtube.com/watch?v=Dnd28lQHquU)
+> - int : 类似于 uint，后面也可以分配大小。
+> - address : 钱包地址
+> - bytes : 后面可以跟 32，代表给变量分配了多少 Bytes，跟字符串类似。
+
+### 2.4 : Basic Solidity Functions
+
+> "Functions" or "Methods" : 能够调用并执行某些操的的一块封包代码。
+
+```sol
+contract SimpleStorage {
+   uint256 public favoriteNumber;
+
+   function store(uint256 _favoriteNumber) public {
+      favoriteNumber = _favoriteNumber;
+   }
+}
+```
