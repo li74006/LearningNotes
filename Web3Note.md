@@ -93,5 +93,48 @@ contract SimpleStorage {
    function store(uint256 _favoriteNumber) public {
       favoriteNumber = _favoriteNumber;
    }
+
+   // view, pure 这两个关键词不消耗 Gas，但是 pure 不能读取区块链的状态。
+   function retrieve() public view returns(uint256){
+      return favoriteNumber;
+   }
+
+   function add() public pure {
+      return(1+1);
+   }
 }
 ```
+
+每一次改变区块链的状态，都会发送交易。
+函数中的操作越多，消耗的 Gas 就越多。
+
+### 2.5 : Basic Solidity Arrays & Structs(结构体)
+
+```sol
+// struct 类似于工厂函数。
+struct People {
+   uint256 favoriteNumber;
+   string name;
+}
+
+People public person = People ({
+   favoriteNumber: 2,
+   name: 'Tony'
+})
+
+// unit256[] public favoriteNumbersList; --> 这样favoriteNumbersList 就是一个数组了。
+// 如果 People[3] --> 这样就将 People 数组大小限定为 3 个了，当 [] 为空时，数组可以任意大小。
+People[] public people;
+
+ function addPerson(string memory _name, unit256 _favoriteNumber) public {
+   // 向 people 中 push 一个新 People
+   People memroy newPerson = People ({
+      favoriteNumber: _favoriteNumber,
+      name: _name
+   })
+   people.push(newPerson);
+   // 或者直接写成 people.push(People(_favoriteNumber, _name)); 这样就不用写 memroy 了。
+ }
+```
+
+### 2.6
