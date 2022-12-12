@@ -159,3 +159,37 @@ mapping(string => uint256) public nameToFavoriteNumber;
    nameToFavoriteNumber[_name] = _favoriteNumber;
  }
 ```
+
+### 2.9 : Develop your Fitst Contract
+
+insufficient funds ~
+
+### 2.10 : The EVM & A Recap of Lesson 2
+
+> EVM : Ethereum Virtual Machine.是一种将智能合约部署到一天放的标准；任何执行 EVM 标准的区块链，我们都可以把 solidity 代码部署上去，例如 ：Avalanche， Fanton， Polygon。
+
+### 3.1 : Remix Storage Factory
+
+### 3.2 : Importing Contracts into other Contracts
+
+```sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "./SimpleStorage.sol";
+
+contract StorageFactory{
+   SimpleStorage public simpleStorage;
+   // 类型是 SimpleStorage contract，可见性是 public，变量名是 simplestorage。因为上面引入了用 contract 关键字定义的 SimpleStorage 合同（这一步就是生成一个全局变量，名字叫 simplestorage，跟前几节课学的声明变量意思差不多），详情参考 https://stackoverflow.com/questions/71550258/what-is-this-solidity-variable-type?newreg=59643602469e46b2a3c952a62f7eb7e0
+   SimpleStorage[] public simpleStorageArray;
+   // 这样每次生成的合同，就会存在数组里，而不是像上一个定义的变量，每次生成一个新的合同都会替换之前的合同。
+
+   function createSimpleStorageContract() public {
+      simpleStorage = new SimpleStorage();
+
+      SimpleStorage simpleStorage = new SimpleStorage();
+      // 第一个是，用 SimpleStorage 将其存作为一个 memory variable 来存储，然后新 new 一个 simpleStorage 实例，然后就能用下一行代码把它 push 进 simpleStorageArray 里面了，就类似于前些课程讲的创建数组，并且往里面 push 东西类似。
+      simpleStorageArray.push(simpleStorage);
+   }
+}
+```
