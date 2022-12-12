@@ -271,5 +271,186 @@ class Account {
 
 let account = new Account(100);
 console.log(account.getBalance());
+```
 
+### 7 ： Parameter Properties
+
+```ts
+class Account {
+  nickname?: string;
+
+  constructor(
+    public readonly id: number,
+    public owner: string,
+    private _balance: number
+  ) {}
+  // 这样就不用向之前那样创建 class 了，更加简洁。
+}
+```
+
+### 8 ： Getters and Setters
+
+getter: 从类中获得一个参数的方法。
+setter: 设置值用的方法。
+
+```ts
+class Account {
+  get balance(): number {
+    return this._balance;
+  }
+
+  set balance(value: number) {
+    if (value < 0) throw new Error("Invalid value");
+    this._balance = value;
+  }
+}
+```
+
+### 9 : Index Signatures
+
+```ts
+class SeatAssignment {
+  [seatNumber: string]: string;
+}
+
+let seats = new SeatAssignment();
+seats.A1 = "Mosh"; // 等同于 seats['A1'] = 'Mosh'；
+seats.A2 = "Ohcysp";
+```
+
+### 10 ： Static Members
+
+```ts
+class Ride {
+  private static _activeRides: number = 0; // 前面加了 static 后，activeRides 就不基于 new 出来的每个 ride 独立存在，只是该类的一个单独实例。
+
+  start() {
+    Ride.activeRides++;
+  }
+  stop() {
+    Ride.activeRides--;
+  }
+
+  static get activeRides() {
+    return Ride._activeRides;
+  }
+}
+
+console.log(Ride.activeRides);
+```
+
+### 11 ： Inheritance
+
+```ts
+class Person{
+  constructor( public firstName: string, public lastName: string){}
+
+  get fullNanme(){
+      return this.firstName + ' ' +this.lastName；
+    }
+
+  walk(){
+    console.log('Walking')
+  }
+}
+
+class Student extends Person {
+  constructor（public studentId: number, firstName: string, lastName: string）{
+    super(firstName, lastName)
+  }
+
+  takeTest(){
+    console.log('Taking a test')
+  }
+}
+
+let student = new Student(1, 'Ohc', 'ysp');
+```
+
+### 12 : Method Overriding
+
+```ts
+// 接上一节
+class Teacher extends Person {
+  override get fullName() {
+    return "Perfessor" + super.fullName; // 这里可以继承父类的方法，增强复用。
+  }
+}
+```
+
+- "noImplictOverride"：是否允许子类能与父类具有同名的方法。
+
+### 13 : Polymorphism(多态)
+
+```ts
+// 接上节
+printNames([new Student(1, "John", "Smith"), new Teacher("Ohc", "ysp")]);
+
+function printNames(people: Person[]) {
+  for (let person of people) console.log(person.fullName);
+}
+```
+
+> Open Closed Principle: Classes should be open for extension and closed for modification.
+
+### 14 : Private vs Protected Methods
+
+private 不能被子类继承，protected 可以被子类继承，子类中可以写 this.foo(),来调用父类中的 foo() 方法，建议尽可能少的使用 protected 。
+
+### 15 : Abstract Classes and Methods
+
+```ts
+abstract class Shape {
+  // 前面加 abstract 告诉编译器父类没有准备好，得找个子类继续下去。
+  constructor(public color: string) {}
+  render() {}
+
+  // 方法前面也可以加 abstract，写法如下：
+  abstract render(): void;
+  // 方法前面写 abstract，类前面就也得写 abstract，否则会报错
+}
+
+class Circle extends Shape {
+  constructor(public radius: number, color: string) {
+    super(color);
+  }
+
+  override runder(): void {
+    console.log("Rendering a circle");
+  }
+}
+```
+
+### 16 ： Interfaces
+
+```ts
+abstract class Calendar {
+  constructor(public name: string) {}
+
+  abstract addEvent(): void;
+  abstract removeEvent(): void;
+}
+
+// interface 中无法写 methods。
+interface Calendar {
+  name: string;
+  addEvent(): void;
+  removeEvent(): void;
+}
+
+interface CloudCalendar extends Calendar {
+  sync(): void;
+}
+
+// 继承 interface 生成的类时，后面跟 implement，并且可以在点击下面 GoogleCalendar 后，使用快捷键 Ctrl + . ,快速导入父类方法等。
+class GoogleCalendar implements Canendar {
+  constructor(public name: string) {}
+
+  addEvent(): void {
+    throw new Error("Method not implemented");
+  }
+  removeEvent(): void {
+    throw new Error("Method not implemented");
+  }
+}
 ```
