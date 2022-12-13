@@ -454,3 +454,180 @@ class GoogleCalendar implements Canendar {
   }
 }
 ```
+
+## Generics
+
+### 1 : Introduction
+
+### 2 : Understanding the Problem
+
+### 3 : Generic(泛型) Classes
+
+```ts
+class KeyValuePair<T> {
+  constructor(public key: T, public value: string) {}
+}
+
+let pair = new KeyValuePair<string>("1", "a");
+// 也可以不在 < > 中声明类型，编译器会根据填写的参数类型自动赋类。
+```
+
+### 4 : Generic Functions
+
+```ts
+class ArrayUtils {
+  static wrapInArry<T>(value: T) {
+    return [value];
+  }
+}
+
+let numbers = ArrayUtils.wrapInWrap(1);
+```
+
+### 5 : Generic Interfaces
+
+```ts
+interface Result<T> {
+  data: T | null;
+  error: string | null;
+}
+
+function fetch<T>(url: string): Result<T> {
+  return { data: null, error: null };
+}
+
+interface User {
+  username: string;
+}
+
+interface Product {
+  title: string;
+}
+
+let result = fetch<User>("url");
+let result = fetch<Product>("url");
+```
+
+### 6 : Generic Constraints(约束)
+
+```ts
+function echo<T extends number | string>(value: T): T {
+  return value;
+}
+// 将其限制为 number 或者 string
+
+// 或者在 extends 后面加个对象进行限制
+function echo<T extends { name: string }>(value: T): T {
+  return value;
+}
+
+// 或者写一个 interface 进行限制
+interface Person {
+  name: string;
+}
+
+function echo<T extends Person>(value: T): T {
+  return value;
+}
+
+// 或者用 class进行限制
+class Person {
+  constructor(public name: string) {}
+}
+
+class Customer extends Person {}
+
+function echo<T extends Person>(value: T): T {
+  return value;
+}
+
+echo(new Customer("a"));
+// 或
+echo(new Person("a"));
+```
+
+### 7 : Extending(扩展) Generic Classes
+
+```ts
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._object.push(obj);
+  }
+}
+
+class CompressibleStore<T> extends Store<T> {
+  compress() {}
+}
+
+let store = new CompressibleStore<Product>();
+store.compress();
+
+// 限制了泛型的参数
+class SearchableStore<T extends { name: string }> extends Store<T> {
+  find(name: string): T | undefined {
+    return this._objects.find((obj) => obj.name === name);
+  }
+}
+```
+
+### 8 ： The keyof Operator
+
+```ts
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._object.push(obj);
+  }
+
+  find(property: keyof T, value: unknow): T | undefined {
+    return this._object.find((obj) => obj[property] === value);
+  }
+}
+
+let store = new Store<Product>();
+store.add({ name: "a", price: 1 });
+store.find("name", "a");
+store.find("price", 1);
+store.find("noExistingProperty", 1);
+// 如果上面 find 方法中，不用 keyof,当下面的 find 方法查询不存在参数的时候，就会报 bug 了。
+```
+
+### 9 ： Type Mapping
+
+```ts
+interface Product {
+  name: string;
+  price: number;
+}
+
+type ReadOnlyProduct = {
+  readonly [K in keyof Product]: Product[K];
+};
+
+// 当遇到泛型的时候
+type ReadOnly<T> = {
+  readonly [K in keyof T]: T[K];
+};
+
+type Optional<T> = {
+  [K in keyof T]?: T[K];
+};
+
+// 更多类型详见 TS官方文档 的 typescript utility types
+
+let product: ReadOnly<Product> = {
+  name: "a",
+  price: 1,
+};
+```
+
+## Decorators(装饰器)
+
+### 1 : Introduction
+
+### 2 : What Are Decorators
+
+### 3 : Class Decorators
