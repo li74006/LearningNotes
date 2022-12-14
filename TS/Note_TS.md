@@ -690,10 +690,22 @@ class ProfileComponent {}
 ### 6 : Method Decorators
 
 ```ts
+function Log(target: any, methodName: string, descriptor: ropertyDescriptor) {
+  const original = descriptor.value as Function;
+  descriptor.value = function (...args: any) {
+    console.log("Before");
+    original.call(this, ...args);
+    console.log("After");
+  };
+}
+
 class Person {
+  @Log
   say(message: string) {
-    @Log
-    console.log('Person says' + message);
+    console.log("Person says" + message);
   }
 }
+
+let person = new Person();
+person.say("Hello");
 ```
