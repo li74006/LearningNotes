@@ -709,3 +709,88 @@ class Person {
 let person = new Person();
 person.say("Hello");
 ```
+
+### 7 : Accessor(存取器) Decorators - Title
+
+```ts
+function Capitalize(target: any, methodName: string, descriptor: PropertyDescriptor:){
+  const original = descriptor.get;
+  descriptor.get = function(){
+    const result = original?.call(this)
+    // 上面一句 ? 的意思是，if(original !== null && origianl !== undefined) 然后 origianl.call(this);
+    if(typeof result === 'string') ? result.toUpperCase() : result；
+
+  }
+}
+
+class Person {
+  constructor(public firstName: string, public lastName: string){
+    get fullName(){
+
+      @Capitalize
+      return `${this.firstName} ${this.lastName}`;
+    }
+  }
+}
+```
+
+### 8 ： Property Decorators
+
+```ts
+function MinLength(length: number) {
+  return (target: any, propertyName: string) => {
+    let value: string;
+
+    const descriptor: PropertyDescriptor = {
+      get() {
+        return value;
+      },
+      set(newValue: string) {
+        if (newValue.length < length)
+          throw new Error(
+            `${propertyName} should be at least ${length} characters long.`
+          );
+        value = newValue;
+      },
+    };
+
+    Object.defineProperty(target, propertyName, descriptor);
+  };
+}
+
+class User {
+  @MinLength(4)
+  password: string;
+
+  constructor(password: string) {
+    this.password = password;
+  }
+}
+
+let user = new User("1234");
+console.log(user.password);
+```
+
+### 9 : Parameter Decorators
+
+```ts
+type WatchParameter = {
+  methodName: string,
+  parameterIndex: number,
+}
+
+const watchedParameter[] = [];
+
+function Watch(target: any, methodName: string, parameterIndex: number) {
+  watchedParameter.push(
+    methodName,
+    parameterIndex
+  )
+}
+
+class Vehicle {
+  move(@Watch speed: number) {}
+}
+
+console.log(watchedParameter);
+```
