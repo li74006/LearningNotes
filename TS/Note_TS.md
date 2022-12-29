@@ -454,3 +454,547 @@ class GoogleCalendar implements Canendar {
   }
 }
 ```
+
+## Generics
+
+### 1 : Introduction
+
+### 2 : Understanding the Problem
+
+### 3 : Generic(泛型) Classes
+
+```ts
+class KeyValuePair<T> {
+  constructor(public key: T, public value: string) {}
+}
+
+let pair = new KeyValuePair<string>("1", "a");
+// 也可以不在 < > 中声明类型，编译器会根据填写的参数类型自动赋类。
+```
+
+### 4 : Generic Functions
+
+```ts
+class ArrayUtils {
+  static wrapInArry<T>(value: T) {
+    return [value];
+  }
+}
+
+let numbers = ArrayUtils.wrapInWrap(1);
+```
+
+### 5 : Generic Interfaces
+
+```ts
+interface Result<T> {
+  data: T | null;
+  error: string | null;
+}
+
+function fetch<T>(url: string): Result<T> {
+  return { data: null, error: null };
+}
+
+interface User {
+  username: string;
+}
+
+interface Product {
+  title: string;
+}
+
+let result = fetch<User>("url");
+let result = fetch<Product>("url");
+```
+
+### 6 : Generic Constraints(约束)
+
+```ts
+function echo<T extends number | string>(value: T): T {
+  return value;
+}
+// 将其限制为 number 或者 string
+
+// 或者在 extends 后面加个对象进行限制
+function echo<T extends { name: string }>(value: T): T {
+  return value;
+}
+
+// 或者写一个 interface 进行限制
+interface Person {
+  name: string;
+}
+
+function echo<T extends Person>(value: T): T {
+  return value;
+}
+
+// 或者用 class进行限制
+class Person {
+  constructor(public name: string) {}
+}
+
+class Customer extends Person {}
+
+function echo<T extends Person>(value: T): T {
+  return value;
+}
+
+echo(new Customer("a"));
+// 或
+echo(new Person("a"));
+```
+
+### 7 : Extending(扩展) Generic Classes
+
+```ts
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._object.push(obj);
+  }
+}
+
+class CompressibleStore<T> extends Store<T> {
+  compress() {}
+}
+
+let store = new CompressibleStore<Product>();
+store.compress();
+
+// 限制了泛型的参数
+class SearchableStore<T extends { name: string }> extends Store<T> {
+  find(name: string): T | undefined {
+    return this._objects.find((obj) => obj.name === name);
+  }
+}
+```
+
+### 8 ： The keyof Operator
+
+```ts
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._object.push(obj);
+  }
+
+  find(property: keyof T, value: unknow): T | undefined {
+    return this._object.find((obj) => obj[property] === value);
+  }
+}
+
+let store = new Store<Product>();
+store.add({ name: "a", price: 1 });
+store.find("name", "a");
+store.find("price", 1);
+store.find("noExistingProperty", 1);
+// 如果上面 find 方法中，不用 keyof,当下面的 find 方法查询不存在参数的时候，就会报 bug 了。
+```
+
+### 9 ： Type Mapping
+
+```ts
+interface Product {
+  name: string;
+  price: number;
+}
+
+type ReadOnlyProduct = {
+  readonly [K in keyof Product]: Product[K];
+};
+
+// 当遇到泛型的时候
+type ReadOnly<T> = {
+  readonly [K in keyof T]: T[K];
+};
+
+type Optional<T> = {
+  [K in keyof T]?: T[K];
+};
+
+// 更多类型详见 TS官方文档 的 typescript utility types
+
+let product: ReadOnly<Product> = {
+  name: "a",
+  price: 1,
+};
+```
+
+## Decorators(装饰器)
+
+### 1 : Introduction
+
+### 2 : What Are Decorators
+
+- "experimentalDecorators"：是否启用装饰器。
+
+> 装饰器：就是一个在 js 运行期间被调用的函数。
+
+### 3 : Class Decorators
+
+```ts
+function Component(constructor: Function) {
+  console.log("Component decorator called");
+  constructor.prototype.uniqueId = Date.now();
+  constructor.prototype.insertInDom = () => {
+    console.log("Inserting the component in the DOM");
+  };
+}
+
+@Component
+class ProfileComponent {}
+```
+
+### 4 : Parameterized(参数化的) Decorators
+
+```ts
+type ComponentOptions = {
+  selector: string;
+};
+
+function Component(options: ComponentOptions) {
+  return (constructor: Function) => {
+    console.log("Component decorator called");
+    constructor.prototype.options = options;
+    constructor.prototype.uniqueId = Date.now();
+    constructor.prototype.insertInDom = () => {
+      console.log("Inserting the component in the DOM");
+    };
+  };
+}
+
+@Component({ selector: "#my-profile" })
+class ProfileComponent {}
+```
+
+### 5 : Decorator Composition(组成)
+
+```ts
+// 接上节
+
+function Pipe(constructor: Function) {
+  console.log("Pipe decorator called");
+  constructor.prototype.pipe = true;
+}
+
+@Component({ selector: "my-profile" })
+@Pipe
+class ProfileComponent {}
+// 先执行 Pipe，再执行Component。
+```
+
+### 6 : Method Decorators
+
+```ts
+function Log(target: any, methodName: string, descriptor: ropertyDescriptor) {
+  const original = descriptor.value as Function;
+  descriptor.value = function (...args: any) {
+    console.log("Before");
+    original.call(this, ...args);
+    console.log("After");
+  };
+}
+
+class Person {
+  @Log
+  say(message: string) {
+    console.log("Person says" + message);
+  }
+}
+
+let person = new Person();
+person.say("Hello");
+```
+
+### 7 : Accessor(存取器) Decorators - Title
+
+```ts
+function Capitalize(target: any, methodName: string, descriptor: PropertyDescriptor:){
+  const original = descriptor.get;
+  descriptor.get = function(){
+    const result = original?.call(this)
+    // 上面一句 ? 的意思是，if(original !== null && origianl !== undefined) 然后 origianl.call(this);
+    if(typeof result === 'string') ? result.toUpperCase() : result；
+
+  }
+}
+
+class Person {
+  constructor(public firstName: string, public lastName: string){
+    get fullName(){
+
+      @Capitalize
+      return `${this.firstName} ${this.lastName}`;
+    }
+  }
+}
+```
+
+### 8 ： Property Decorators
+
+```ts
+function MinLength(length: number) {
+  return (target: any, propertyName: string) => {
+    let value: string;
+
+    const descriptor: PropertyDescriptor = {
+      get() {
+        return value;
+      },
+      set(newValue: string) {
+        if (newValue.length < length)
+          throw new Error(
+            `${propertyName} should be at least ${length} characters long.`
+          );
+        value = newValue;
+      },
+    };
+
+    Object.defineProperty(target, propertyName, descriptor);
+  };
+}
+
+class User {
+  @MinLength(4)
+  password: string;
+
+  constructor(password: string) {
+    this.password = password;
+  }
+}
+
+let user = new User("1234");
+console.log(user.password);
+```
+
+### 9 : Parameter Decorators
+
+```ts
+type WatchParameter = {
+  methodName: string,
+  parameterIndex: number,
+}
+
+const watchedParameter[] = [];
+
+function Watch(target: any, methodName: string, parameterIndex: number) {
+  watchedParameter.push(
+    methodName,
+    parameterIndex
+  )
+}
+
+class Vehicle {
+  move(@Watch speed: number) {}
+}
+
+console.log(watchedParameter);
+```
+
+## Modules
+
+### 1 : Introduction
+
+### 2 : Exporting and Importing
+
+```ts
+// 在 './shapes' 想要暴露的对象前面加 export 就行。
+
+import { Circle, Square } from "./shapes";
+// 可以在 { } 中使用 Ctrl + Space ,就能看到所有从 shapes 中暴露出来的 object
+// 如果 { } 中有不想使用的引入对象，可以用 Ctrl + . ,选 Remove unused... 就可以将其移除。
+```
+
+### 3 : Module Formats
+
+### 4 : Default Exports
+
+### 5 : Wildcard(通配符) Imports
+
+```ts
+import * as Shapes from "./shapes";
+```
+
+### 6 : Re-exporting
+
+## Integration with JavaScript
+
+### 1 : Introduction
+
+### 2 : Including JS Code in TS Projects
+
+- "allowJs"：是否允许引入 JS。
+
+### 3 ： Type Checking JS Code
+
+- "checkJs": 是否对 JS 进行类型检查。
+
+> 开启对 JS 类型检查后，可以在 JS 文件中加入特殊注释：// @ts-nocheck ，来取消 TS 对引入 JS 的类型检查。
+
+### 4 : Describing Types Using JSDoc
+
+```js
+// 在 JS 中添加：
+/**
+ * Calculates income tax. 还可以在里面写注释
+ * @param {number} income -这里也可以写注释
+ * @returns {number}
+ */
+```
+
+### 5 : Creating Declaration Files
+
+除了上一节添加标注的方法之外，还可以为需要注释的文件创建的同名的注释文件（tax.d.ts)。
+
+```ts
+export declare function calculateTax(income: number): number;
+```
+
+### 6 : Using Definitely Typed Declaration Files
+
+例如纯 JS 写的 lodash，在 TS 中就无法引入，所以使用 Definitely Typed ，仓库提供了用 TS 写好的主流库。
+
+> npm i -D @types/lodash
+
+## React with TypeScript
+
+### 1 : Introduction
+
+### 2 : Creating a React App with TypeScript
+
+### 3 : Adding Bootstrap
+
+### 4 : Creating a Component - Title
+
+### 5 : Using the State Hook
+
+### 6 : Calling the Backend
+
+### 7 : Using the Effect Hook
+
+### 8 : Handling Events
+
+### 9 : Building a Form
+
+### 10 : Handling Form Submission
+
+## Node and Express with TypeScript
+
+### 1 : Introduction
+
+### 2 : Executing TypeScript Code with Node
+
+```
+npm init -y
+npm i -D ts-node 或 // npm i -g ts-node
+
+// 然后在 package.json 中，将 "scripts" 下原有内容换为 "start": "ts-node index.ts"
+
+npm start
+```
+
+### 3 : Setting up an Express Project
+
+```ts
+npm i express
+npm i -D typescript @types/node @types/express
+tsc --init
+
+import express from 'express';
+const app = express();
+app.listin(8000, () => console.log('Server started'));
+```
+
+### 4 : Creating a Basic Route
+
+```ts
+import express from "express";
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Hello world");
+});
+
+app.listin(8000, () => console.log("Server started"));
+```
+
+### 5 : Creating a Router
+
+```ts
+// 新建 reminders.ts
+import { Router } from "express";
+
+const router = Router();
+
+router.get("/", (req, res) => {
+  res.send("List of reminders");
+});
+
+export default router;
+```
+
+```ts
+import express from "express";
+const app = express();
+import remindersRouter from "./routers/reminders";
+
+app.use("/reminders", remindersRouter);
+
+app.get("/", (req, res) => {
+  res.send("Hello world");
+});
+
+app.listin(8000, () => console.log("Server started"));
+```
+
+### 6 : Parsing Request Bodies
+
+```ts
+// 接上节 reminders.ts
+
+// DTO 是 Data Tarnsfer Object，是客户端发送给服务器的对象。
+interface CreateReminderDto {
+  title: string;
+}
+
+router.post("/", (req, res) => {
+  const { title } = req.body as CreateReminderDto;
+  res.json(title);
+});
+```
+
+### 7 : Building an API
+
+```ts
+// 新建 reminder.ts
+export default class Reminder {
+  id: number;
+  isCompleted: boolean;
+
+  constructor(pubuli title: string) {
+    this.id = Date.now();
+    this.isComplete = false;
+  }
+}
+```
+
+```ts
+// 接上节 reminders.ts
+
+interface CreateReminderDto {
+  title: string;
+} // 这个接口已经抽到另一个模块去了，懒了就不仔细记录了。
+
+const reminders: Reminder[] = [];
+
+router.post("/", (req, res) => {
+  const { title } = req.body as CreateReminderDto;
+  const reminder = new Reminder(title);
+  reminders.push(reminder);
+  res.status(201).json(reminder);
+});
+```
