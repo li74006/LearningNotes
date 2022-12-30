@@ -63,3 +63,22 @@ bookmark : 2022-12-17 6.1 节完成（跟倩倩看了水之道，然后回来还
 > 选择多个面 > 右键 > Dissolve Faces > 将这几个面进行融并。
 
 bookmark : 2022-12-29 6.4 节完成
+
+### P21 : 面的切割（Knife 快捷键 K）
+
+> 选择要切割的点时，按 Shift 自动吸附某一边的中点。
+> 选完后， 按 Enter 确认切割。
+
+> 选多个面 > 整体切割：Bisect（横贯）。
+
+### P22 : 法向
+
+> 右上角按钮区 > 展开 Overlays 下拉菜单 > Normals 设置展视点、线、面的法向线及其长度。
+
+> 右上角按钮区 > 展开 Overlays 下拉菜单 > Geometry（几何图形）> 勾选 Face Orientation（方向） > 着色显示正反面。
+
+> 右上角按钮区 > 展开 Shading 下拉菜单 > 勾选 Backface Culling（背景剔除）> 从背景方向向外看的时候就会透明显示。
+
+> 左上角菜单区域 > Mesh > Normals > Flip（翻转）> 把选定面的正反面翻转
+
+bookmark : 2022-12-30 6.6 节完成
