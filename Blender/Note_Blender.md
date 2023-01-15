@@ -158,4 +158,4 @@ bookmark : 2022-1-13 7.8 节完成。
 ### P36 : 顶点合并
 
 > 右上角工具条 > Overlays > 勾选 Statistics（统计），左上角会出现统计信息。
-> bookmark : 2022-1-13 8.6 01：00min。
+> bookmark : 2022-1-13 8.6 01:00min。
