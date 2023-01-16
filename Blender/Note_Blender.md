@@ -158,4 +158,12 @@ bookmark : 2022-1-13 7.8 节完成。
 ### P36 : 顶点合并
 
 > 右上角工具条 > Overlays > 勾选 Statistics（统计），左上角会出现统计信息。
-> bookmark : 2022-1-13 8.6 01:00min。
+
+bookmark : 2022-1-13 8.4 01:00min。
+
+> Edit > Preference > Editors > Status Bar > Show > Scene Statistics > 会将场景的统计数据在右下角状态栏显示。
+> 选中某些顶点 > 右键/M > Merge Vertices > At Center。
+> A > 全选所有点 > 右键/M > Merge Vertices > By Distance > 可对间距小于一定距离的点进行融合。
+> 右上角工具栏 > 点击 Auto Merge Vertices/勾选 Options 中 Auto Merge 并设置距离 > 当两点间距离小于一定值时将自动融合。
+
+bookmark : 2022-1-16 8.4 节完成。
