@@ -167,3 +167,15 @@ bookmark : 2022-1-13 8.4 01:00min。
 > 右上角工具栏 > 点击 Auto Merge Vertices/勾选 Options 中 Auto Merge 并设置距离 > 当两点间距离小于一定值时将自动融合。
 
 bookmark : 2022-1-16 8.4 节完成。
+
+### P37 : 连接顶点
+
+> 选中顶点 > 右键 > New Edge/Face from Vertices(快捷键 F) > 会连接两个顶点，但是连接后的线是独立于平面的，不会对该面进行分割。
+> 选中顶点 > 右键 > Connect Vertices Path(快捷键 J) > 顶点连接后的路径会分割平面。
+> 选中顶点 > X > Dissolve Vertices > 会融并顶点周围的线面。
+
+# P38 : 衰减编辑（Proportional Edit）
+
+> 选中点、线或面 > 点击顶部工具条开启 Proportional Editing > 再选择左侧移动工具，移动过程中对象间连接会比较圆滑 > 移动过程中滚动滚轮，可以调整衰减影响的范围。
+
+bookmark : 2022-1-17 8.6 节完成。
