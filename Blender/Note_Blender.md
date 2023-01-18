@@ -196,3 +196,11 @@ bookmark : 2022-1-17 8.6 节完成。
 在 Perference 中添加即可。
 
 bookmark : 2022-1-17 9.1 节完成。
+
+# P43 : 各种形状
+
+# P44 : 练习五角星
+
+> X > Collapse Edges & Faces > 塌陷边与面
+
+# P45 :
