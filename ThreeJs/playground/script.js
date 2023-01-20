@@ -1,1 +1,30 @@
-console.log("Hello Three.js");
+// create scene
+const scene = new THREE.Scene();
+
+// create red cube
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: "red" });
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+// set sizes
+const sizes = {
+  width: 800,
+  height: 600,
+};
+
+// create camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
+camera.position.z = 3;
+
+scene.add(camera);
+
+// create renderer
+const canvas = document.querySelector(".webgl");
+console.log(canvas);
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas, // 键值跟变量名相同的时候可以省略变量名
+});
+
+renderer.setSize(sizes.width, sizes.height);
+renderer.render(scene, camera);
