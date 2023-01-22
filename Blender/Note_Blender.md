@@ -258,3 +258,13 @@ bookmark : 2022-1-21 11.3 节完成。
 > 钢笔工具下 > Ctrl + Mouse Left > 删除控制点。
 
 bookmark : 2022-1-22 11.4 节完成。
+
+# P54 : 曲线的更多操作
+
+> 延申一条曲线可以使用 E 挤出或者 Curve Pen。
+> 闭合一条曲线 > 选中两个点 > F。
+> 拆分一条曲线 > 选中曲线中两个点 > 右键 Spilt/Y > G 将其移走。
+> 查看曲线的法向 > 右上角 Overlays > 勾选最下方 Display Normals
+> 曲线编辑模式下 > 上方工具条 > Sagment > Switch Direction > 切换曲线的法线方向。
+
+bookmark : 2022-1-23 11.5 节完成。
