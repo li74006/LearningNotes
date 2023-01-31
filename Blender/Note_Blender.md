@@ -348,3 +348,16 @@ bookmark : 2023-1-30 17.3 节完成。
 # P79 : 线框修改器
 
 bookmark : 2023-1-30 18.1 节完成。
+
+# P80 : 菱形网面
+
+> 选中细分网格下所有的边 > 菜单栏 Edge > Un-Subdivide > 将 Iterations 设为 1 即可。
+> 圆柱体先对其进行环切 > Un-Subdivide 即可。
+
+# P81 : 练习 笔筒
+
+# P82 : 表面细分修改器
+
+> Modifier Property > Add Modifier > Subdivision Surface
+
+bookmark : 2023-1-31 19.1 节完成。
