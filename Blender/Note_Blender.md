@@ -361,3 +361,12 @@ bookmark : 2023-1-30 18.1 节完成。
 > Modifier Property > Add Modifier > Subdivision Surface
 
 bookmark : 2023-1-31 19.1 节完成。
+
+# P83 : 细分与卡线
+
+# P84 : 边线折痕
+
+> 细分前选择某些边线 > 右键 Edge Crease (Shift + E) > 再对该对象进行细分操作时，该折痕边倒角就没那么平滑了。
+> 修改后可使用 N 调出面板 > Item > Mean Crease 对折痕边进行调整。
+
+# P85 : 三角面与多边面
