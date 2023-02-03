@@ -36,6 +36,10 @@ renderer.render(scene, camera);
 // 方法二 ：clock
 let clock = new THREE.Clock();
 
+// 使用 gsap 添加动画
+// gsap.to(mesh.position, { duration: 1, delay: 1, x: 2 });
+// gsap.to(mesh.position, { duration: 1, delay: 2, x: 0 });
+
 // animation
 
 const tick = () => {
@@ -53,9 +57,11 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
 
   // update objects
-  mesh.rotation.y = elapsedTime;
+  // mesh.rotation.y = elapsedTime;
   // mesh.rotation.y = elapsedTime * Math.PI * 2;
-  mesh.position.y = Math.sin(elapsedTime);
+  camera.position.y = Math.sin(elapsedTime);
+
+  // camera.lookAt(mesh.position); // 让相机摄像头始终朝向对象的中心拍摄。
 
   // render
   renderer.render(scene, camera);
