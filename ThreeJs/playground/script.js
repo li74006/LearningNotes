@@ -1,3 +1,14 @@
+// Cursor 获取鼠标位置，实现在鼠标移动时转动相机位置
+const cursor = {
+  x: 0,
+  y: 0,
+};
+window.addEventListener("mousemove", (e) => {
+  cursor.x = e.clientX / sizes.width - 0.5;
+  cursor.y = e.clientY / sizes.height - 0.5;
+  console.log(cursor.x);
+});
+
 // create scene
 const scene = new THREE.Scene();
 
@@ -15,10 +26,29 @@ const sizes = {
 };
 
 // create camera
+
+// PerspectiveCamera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 
-camera.position.z = 3;
+// OrthographicCamera
+// const aspectRatio = sizes.width / sizes.height; // 使用画布的宽高比，纠正 OrthographicCamera 对对象的压缩问题。
+// const camera = new THREE.OrthographicCamera(
+//   -1 * aspectRatio,
+//   1 * aspectRatio,
+//   1,
+//   -1,
+//   0.1,
+//   100
+// );
+
+// camera.position.x = 2;
+// camera.position.y = 2;
+camera.position.z = 2;
 scene.add(camera);
+
+// controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 // create renderer
 const canvas = document.querySelector(".webgl");
@@ -29,39 +59,27 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.render(scene, camera);
 
-// 解决显示器刷新率不同导致的转速不同问题
-// // 方法一 ：time
-// let time = Date.now();
-
-// 方法二 ：clock
+// clock
 let clock = new THREE.Clock();
 
-// 使用 gsap 添加动画
-// gsap.to(mesh.position, { duration: 1, delay: 1, x: 2 });
-// gsap.to(mesh.position, { duration: 1, delay: 2, x: 0 });
-
-// animation
-
 const tick = () => {
-  // // 方法一 ：time
-  // const currentTime = Date.now(); // 当前帧的时间戳
-  // const deltaTime = currentTime - time; // 当前帧与上一帧的时间差，这是为了解决在不统刷新率的显示器上，能让对象保持相同的转速。
-
-  // time = currentTime; // 更新上一帧的时间戳
-  // console.log(deltaTime);
-
-  // // update objects
-  // mesh.rotation.y += 0.001 * deltaTime;
-
-  // 方法二 ：clock
+  // clock
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
 
   // update objects
-  // mesh.rotation.y = elapsedTime;
-  // mesh.rotation.y = elapsedTime * Math.PI * 2;
-  camera.position.y = Math.sin(elapsedTime);
+  mesh.rotation.y = elapsedTime;
+
+  // update camera 让相机转圈对物体进行拍摄
+  // camera.position.x = cursor.x * 3;
+  // camera.position.y = -cursor.y * 3;
+  // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3;
+  // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3;
+  // camera.position.y = cursor.y * 5;
 
   // camera.lookAt(mesh.position); // 让相机摄像头始终朝向对象的中心拍摄。
+
+  // update controls
+  controls.enableDamping = true;
 
   // render
   renderer.render(scene, camera);
@@ -70,3 +88,5 @@ const tick = () => {
 };
 
 tick();
+
+console.log(OrbitControls);

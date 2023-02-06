@@ -211,9 +211,10 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
 
   // update objects
-  // mesh.rotation.y = elapsedTime;
+  mesh.rotation.y = elapsedTime;
   // mesh.rotation.y = elapsedTime * Math.PI * 2;
-  camera.position.y = Math.sin(elapsedTime);
+  // camera.position.y = Math.sin(elapsedTime);
+  // camera.position.x = Math.cos(elapsedTime);
 
   // camera.lookAt(mesh.position); // 让相机摄像头始终朝向对象的中心拍摄。
 
@@ -225,3 +226,36 @@ const tick = () => {
 
 tick();
 ```
+
+### P7 : Cameras
+
+Cameras :
+
+1. ArrayCamera : can be used in order to efficiently render a scene with a predefined set of cameras.
+2. StereoCamera(立体摄像机) : Dual PerspectiveCameras used for effects such as 3D Anaglyph or Parallax Barrier.
+3. CubeCamera : Creates 6 cameras that render to a WebGLCubeRenderTarget.
+4. OrthographicCamera : In this projection mode, an object's size in the rendered image stays constant regardless of its distance from the camera.
+5. PerspectiveCamera : This projection mode is designed to mimic the way the human eye sees. It is the most common projection mode used for rendering a 3D scene.
+
+> PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
+> fov — Camera frustum vertical field of view.
+> aspect — Camera frustum aspect ratio.
+> near — Camera frustum near plane.
+> far — Camera frustum far plane.
+
+> OrthographicCamera( left : Number, right : Number, top : Number, bottom : Number, near : Number, far : Number )
+> left — Camera frustum left plane.
+> right — Camera frustum right plane.
+> top — Camera frustum top plane.
+> bottom — Camera frustum bottom plane.
+> near — Camera frustum near plane.
+> far — Camera frustum far plane.
+
+Controls :
+
+1. FlyControls : enables a navigation similar to fly modes in DCC tools like Blender.
+2. FirstPersonControls : This class is an alternative implementation of FlyControls.
+3. PointerLockControls : The implementation of this class is based on the Pointer Lock API. PointerLockControls is a perfect choice for first person 3D games.
+4. OrbitControl : Orbit controls allow the camera to orbit around a target.
+5. TrackballControls : TrackballControls is similar to OrbitControls. However, it does not maintain a constant camera up vector. That means if the camera orbits over the “north” and “south” poles, it does not flip to stay "right side up".
+6. TransformControls : This class can be used to transform objects in 3D space by adapting a similar interaction model of DCC tools like Blender.
