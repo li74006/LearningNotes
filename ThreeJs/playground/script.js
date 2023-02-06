@@ -1,3 +1,6 @@
+import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
+import { OrbitControls } from "./OrbitControls.js";
+
 // Cursor 获取鼠标位置，实现在鼠标移动时转动相机位置
 const cursor = {
   x: 0,
@@ -6,7 +9,6 @@ const cursor = {
 window.addEventListener("mousemove", (e) => {
   cursor.x = e.clientX / sizes.width - 0.5;
   cursor.y = e.clientY / sizes.height - 0.5;
-  console.log(cursor.x);
 });
 
 // create scene
@@ -26,7 +28,6 @@ const sizes = {
 };
 
 // create camera
-
 // PerspectiveCamera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 
@@ -43,18 +44,19 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 
 // camera.position.x = 2;
 // camera.position.y = 2;
-camera.position.z = 2;
-scene.add(camera);
+camera.position.z = 3;
 
-// controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
+scene.add(camera);
 
 // create renderer
 const canvas = document.querySelector(".webgl");
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas, // 键值跟变量名相同的时候可以省略变量名
 });
+
+// controls
+const controls = new OrbitControls(camera, canvas); // 给 camera 和 canvas 添加 轨道控制 类型的 controls
+controls.enableDamping = true; // 给控制器开启阻尼
 
 renderer.setSize(sizes.width, sizes.height);
 renderer.render(scene, camera);
@@ -67,7 +69,7 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
 
   // update objects
-  mesh.rotation.y = elapsedTime;
+  // mesh.rotation.y = elapsedTime;
 
   // update camera 让相机转圈对物体进行拍摄
   // camera.position.x = cursor.x * 3;
@@ -79,7 +81,7 @@ const tick = () => {
   // camera.lookAt(mesh.position); // 让相机摄像头始终朝向对象的中心拍摄。
 
   // update controls
-  controls.enableDamping = true;
+  controls.update(); // 要实时更新控制器，否则控制器无效
 
   // render
   renderer.render(scene, camera);
@@ -88,5 +90,3 @@ const tick = () => {
 };
 
 tick();
-
-console.log(OrbitControls);
