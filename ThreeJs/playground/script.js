@@ -23,10 +23,19 @@ scene.add(mesh);
 
 // set sizes
 const sizes = {
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
 };
 
+window.addEventListener("resize", () => {
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // 更新相机 aspect 并重新渲染，确保窗口更新后画面更新
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(sizes.width, sizes.height);
+});
 // create camera
 // PerspectiveCamera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);

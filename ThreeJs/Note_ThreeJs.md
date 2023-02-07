@@ -356,3 +356,5 @@ const tick = () => {
 
 tick();
 ```
+
+### P8 : Fullscreen and Resizing
