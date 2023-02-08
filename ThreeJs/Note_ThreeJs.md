@@ -447,3 +447,7 @@ const tick = () => {
 
 tick();
 ```
+
+### P9 : Geometries
+
+new THREE.Geometry() 已经被移除了，但通过学习其之前的使用方法了解到，其原理是通过在空间中构造 3 个点并推入一个 vertices 数组中，再将每个点的 index 添加到 new THREE.Face3 并将其 push 进 faces 中，这样 Geometry 中就形成了一个面，Geometry 中可以同时添加许多面，从而构建出一个复杂的几何对象。

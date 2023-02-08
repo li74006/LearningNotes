@@ -1,4 +1,4 @@
-import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
+// import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
 
 // 按 F 全屏
@@ -21,8 +21,13 @@ window.addEventListener(
 const scene = new THREE.Scene();
 
 // create red cube
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: "red" });
+const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2); // 后三个参数是 x y z 轴向的面的分割次数
+// const geometry = new THREE.BufferGeometry(); // Geometry 已经被移除了，以后自定义点的几何图形就用 buffer 吧
+
+const material = new THREE.MeshBasicMaterial({
+  color: "red",
+  // wireframe: true, // 显示透视线框
+});
 const mesh = new THREE.Mesh(geometry, material);
 
 scene.add(mesh);
