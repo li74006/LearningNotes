@@ -535,3 +535,13 @@ bookmark : 2023-2-6 P138 节完成，啊发的基础篇全部听完。下一步�
 > G > Shift + Z > 限制移动的对象再 x y 平面内移动。
 
 bookmark : 2023-2-6 E1 看到 6:00，真的是每一分钟都是新的知识啊 🤣。
+
+> 按住 Shift + S > 快速移动游标。
+> Ctrl + R > 快速环切 > 同时滚动滚轮可以增加环切段数 > 先点左键确认环切方向，再点右键自动环切到默认位置。
+> 编辑模式下 > 启用右上角 Auto Merge Vertices > 自动融合顶点。
+> 选中某个顶点 > G + G > 沿着某条边滑动顶点。
+> 选中某些对象 > Ctrl + J > 会将他们组成为单独的对象。
+> 修改器使用的先后会影响修改的效果！
+> 选中相机 > View > Align View > Align Active Camera to View 或快捷键 Ctrl + Alt + Numpad 0 > 将相机自动调整到当前视角。
+> View Layer Properties > 可以修改相机视野尺寸。
+> 选中一个对象（这里选中的是添加的地面）> Ctrl 多选 Camera > N 打开 Item 面板 > 右键 Rotation：Z > Copy Single to Selected > 将选中的对象转到与 Camera 视角相同。
