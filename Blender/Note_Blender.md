@@ -545,3 +545,5 @@ bookmark : 2023-2-6 E1 看到 6:00，真的是每一分钟都是新的知识啊 
 > 选中相机 > View > Align View > Align Active Camera to View 或快捷键 Ctrl + Alt + Numpad 0 > 将相机自动调整到当前视角。
 > View Layer Properties > 可以修改相机视野尺寸。
 > 选中一个对象（这里选中的是添加的地面）> Ctrl 多选 Camera > N 打开 Item 面板 > 右键 Rotation：Z > Copy Single to Selected > 将选中的对象转到与 Camera 视角相同。
+
+bookmark : 2023-2-11 E1 看完，还把渲染图发了朋友圈，开心 ~ 😊
