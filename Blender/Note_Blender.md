@@ -547,3 +547,12 @@ bookmark : 2023-2-6 E1 看到 6:00，真的是每一分钟都是新的知识啊 
 > 选中一个对象（这里选中的是添加的地面）> Ctrl 多选 Camera > N 打开 Item 面板 > 右键 Rotation：Z > Copy Single to Selected > 将选中的对象转到与 Camera 视角相同。
 
 bookmark : 2023-2-11 E1 看完，还把渲染图发了朋友圈，开心 ~ 😊
+
+### E2 : [Fox](https://www.youtube.com/watch?v=aMRRNC1J6tU&list=PLfEBMMMIwZRPrsgEvUU_tNvWrBzrDUqoM&index=26&t=13s)
+
+> 选中循环点 > Mesh > Transform > To Sphere > 左右移动鼠标，将选中的循环点变为圆形。
+> 选中循环边 > S > 根据其轴向输入 X 或 Y > 沿其轴向缩放 > 0（沿着 0 度 缩放）> 相当于旋转至垂直其轴向，并使得循环点都移动至同意平面。
+> E > S > 相当于收缩挤出。
+> 选中循环点 > M > At Center > 将其融并到中心。
+
+bookmark : 2023-2-12 E2 看到 9:30 ~
