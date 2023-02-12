@@ -17,20 +17,40 @@ window.addEventListener(
   true
 );
 
+// debug --- create dat.gui
+const gui = new dat.GUI();
+// gui.hide(); // 可默认 gui 面板隐藏
+const geoParameters = {
+  color: 0xffffff,
+  spin: () => {
+    gsap.to(mesh.rotation, {
+      duration: 1,
+      y: mesh.rotation.y + Math.PI * 0.5,
+    });
+  },
+};
+
 // create scene
 const scene = new THREE.Scene();
 
 // create red cube
 const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2); // 后三个参数是 x y z 轴向的面的分割次数
 // const geometry = new THREE.BufferGeometry(); // Geometry 已经被移除了，以后自定义点的几何图形就用 buffer 吧
-
 const material = new THREE.MeshBasicMaterial({
-  color: "red",
+  color: geoParameters.color,
   // wireframe: true, // 显示透视线框
 });
 const mesh = new THREE.Mesh(geometry, material);
-
 scene.add(mesh);
+
+// debug --- set gui
+gui.add(mesh.position, "y", -3, 3, 0.01).name(" Y 轴移动"); // gui.add(object, property, [min], [max], [step]) ⇒ Controller
+gui.add(mesh, "visible");
+gui.add(material, "wireframe");
+gui.addColor(geoParameters, "color").onChange(() => {
+  material.color.set(geoParameters.color); // 再 gui 中调整颜色后，对 material 重新着色
+});
+gui.add(geoParameters, "spin");
 
 // set sizes
 const sizes = {
