@@ -543,7 +543,7 @@ bookmark : 2023-2-6 E1 看到 6:00，真的是每一分钟都是新的知识啊 
 > 选中某些对象 > Ctrl + J > 会将他们组成为单独的对象。
 > 修改器使用的先后会影响修改的效果！
 > 选中相机 > View > Align View > Align Active Camera to View 或快捷键 Ctrl + Alt + Numpad 0 > 将相机自动调整到当前视角。
-> View Layer Properties > 可以修改相机视野尺寸。
+> Output Properties > 可以修改相机视野尺寸。
 > 选中一个对象（这里选中的是添加的地面）> Ctrl 多选 Camera > N 打开 Item 面板 > 右键 Rotation：Z > Copy Single to Selected > 将选中的对象转到与 Camera 视角相同。
 
 bookmark : 2023-2-11 E1 看完，还把渲染图发了朋友圈，开心 ~ 😊
@@ -556,3 +556,7 @@ bookmark : 2023-2-11 E1 看完，还把渲染图发了朋友圈，开心 ~ 😊
 > 选中循环点 > M > At Center > 将其融并到中心。
 
 bookmark : 2023-2-12 E2 看到 9:30 ~
+
+> 选中相机 > G + Z + Z > 拉远/拉进 相机。
+
+bookmark : 2023-2-17 E2 完成 ~ 真是每个建模师的技法都不一样啊 🤣。
