@@ -30,6 +30,75 @@ const geoParameters = {
   },
 };
 
+/**
+ * textures
+ */
+// // 使用传统方式加载纹理
+// const image = new Image();
+// const textures = new THREE.Texture(image);
+// image.onload = () => {
+//   textures.needsUpdate = true; // 图片加载后更新图片
+// };
+// image.src = "./public/textures/door/color.jpg";
+
+/* 使用 three.js api 加载纹理 */
+const loadingManager = new THREE.LoadingManager(); // 先 new 加载管理器
+
+loadingManager.onStart = () => {
+  console.log("loadingManager: loading started");
+};
+loadingManager.onLoad = () => {
+  console.log("loadingManager: loading finished");
+};
+loadingManager.onProgress = () => {
+  console.log("loadingManager: loading progressing");
+};
+loadingManager.onError = () => {
+  console.log("loadingManager: loading error");
+};
+
+const textureLoader = new THREE.TextureLoader(loadingManager); // 再使用 TextureLoader
+
+// const colorTexture = textureLoader.load('/textures/checkerboard-1024x1024.png')
+// const colorTexture = textureLoader.load('/textures/checkerboard-2x2.png')
+const colorTexture = textureLoader.load(
+  "./public/textures/minecraft.png",
+  () => {
+    console.log("textureLoader: loading finished");
+  },
+  () => {
+    console.log("textureLoader: loading progressing");
+  },
+  () => {
+    console.log("textureLoader: loading error");
+  }
+);
+colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+// colorTexture.repeat.x = 2
+// colorTexture.repeat.y = 3
+// colorTexture.offset.x = 0.5
+// colorTexture.offset.y = 0.5
+// colorTexture.rotation = Math.PI * 0.25
+// colorTexture.center.x = 0.5
+// colorTexture.center.y = 0.5
+colorTexture.generateMipmaps = false;
+colorTexture.minFilter = THREE.NearestFilter;
+colorTexture.magFilter = THREE.NearestFilter;
+
+const alphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
+const heightTexture = textureLoader.load("./public/textures/door/height.jpg");
+const normalTexture = textureLoader.load("./public/textures/door/normal.jpg");
+const ambientOcclusionTexture = textureLoader.load(
+  "./public/textures/door/ambientOcclusion.jpg"
+);
+const metalnessTexture = textureLoader.load(
+  "./public/textures/door/metalness.jpg"
+);
+const roughnessTexture = textureLoader.load(
+  "./public/textures/door/roughness.jpg"
+);
+
 // create scene
 const scene = new THREE.Scene();
 
@@ -37,8 +106,7 @@ const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2); // 后三个参数是 x y z 轴向的面的分割次数
 // const geometry = new THREE.BufferGeometry(); // Geometry 已经被移除了，以后自定义点的几何图形就用 buffer 吧
 const material = new THREE.MeshBasicMaterial({
-  color: geoParameters.color,
-  // wireframe: true, // 显示透视线框
+  map: colorTexture,
 });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
