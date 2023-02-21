@@ -5,20 +5,43 @@ import { OrbitControls } from "./OrbitControls.js";
 const scene = new THREE.Scene();
 
 /**
+ * textures
+ */
+const textureLoader = new THREE.TextureLoader();
+
+const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
+const doorAlphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
+const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
+// const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
+// const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
+
+/**
  * objects
  */
-const material = new THREE.MeshBasicMaterial();
+// const material = new THREE.MeshBasicMaterial();
+// material.map = doorColorTexture;
+// // material.color.set("pink"); // 或 material.color = new THREE.Color('pink')
+// // material.opacity = 0.5; // 必须和 transparent 一起用才有效果
+// material.transparent = true;
+// material.alphaMap = doorAlphaTexture;
+// material.side = THREE.DoubleSide; // 或 THREE.BackSide
 
-const sphere = new THREE.Mesh(
-  new THREE.SphereBufferGeometry(0.5, 16, 16),
-  material
-);
+// const material = new THREE.MeshNormalMaterial(); // 用来显示每个面的法向，从而判断关照反射等效果产生哪些影响
+// // material.wireframe = true;
+// // material.flatShading = true;
+
+// const material = new THREE.MeshMatcapMaterial();  // matcap 材质捕获
+// material.matcap = matcapTexture;
+
+const material = new THREE.MeshDepthMaterial(); // 相机距离对象越近，对象越白，反之越黑
+
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
 sphere.position.x = -1.5;
 
-const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), material);
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
 
 const torus = new THREE.Mesh(
-  new THREE.TorusBufferGeometry(0.3, 0.2, 16, 32),
+  new THREE.TorusGeometry(0.3, 0.2, 16, 32), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
   material
 );
 torus.position.x = 1.5;
