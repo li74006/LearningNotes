@@ -560,3 +560,7 @@ bookmark : 2023-2-12 E2 看到 9:30 ~
 > 选中相机 > G + Z + Z > 拉远/拉进 相机。
 
 bookmark : 2023-2-17 E2 完成 ~ 真是每个建模师的技法都不一样啊 🤣。
+
+### E3 : [Boat](https://www.youtube.com/watch?v=TYpY918iMc4&list=PLfEBMMMIwZRPrsgEvUU_tNvWrBzrDUqoM&index=43&t=25s)
+
+> I > B > 进入内插面的 boundary 模式。

@@ -1,22 +1,33 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
+import { PointLight } from "./three.module.js";
+
+/**
+ * gui
+ */
+const gui = new dat.GUI();
 
 // scene
 const scene = new THREE.Scene();
 
 /**
- * textures
+ * textureLoader
  */
 const textureLoader = new THREE.TextureLoader();
 
 const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
 const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
-// const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
-// const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
+const gradientTexture = textureLoader.load("./public/textures/gradients/5.jpg");
+const doorAmbientOcclusionTexture = textureLoader.load(
+  "./public/textures/door/ambientOcclusion.jpg"
+);
+gradientTexture.minFilter = THREE.NearestFilter;
+gradientTexture.magFilter = THREE.NearestFilter;
+gradientTexture.generateMipmaps = false;
 
 /**
- * objects
+ * textures
  */
 // const material = new THREE.MeshBasicMaterial();
 // material.map = doorColorTexture;
@@ -33,20 +44,66 @@ const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
 // const material = new THREE.MeshMatcapMaterial();  // matcap 材质捕获
 // material.matcap = matcapTexture;
 
-const material = new THREE.MeshDepthMaterial(); // 相机距离对象越近，对象越白，反之越黑
+// const material = new THREE.MeshDepthMaterial(); // 相机距离对象越近，对象越白，反之越黑
 
+// const material = new THREE.MeshLambertMaterial();
+
+// const material = new THREE.MeshPhongMaterial();
+// material.shininess = 1000; // 效果类似于表面粗糙度，数值越大越光滑
+// material.specular = new THREE.Color(0xff0000); // 修改材质反光颜色
+
+// const material = new THREE.MeshToonMaterial(); // 卡通效果
+// material.gradientMap = gradientTexture;
+
+const material = new THREE.MeshStandardMaterial();
+material.metalness = 0.4;
+material.roughness = 0.2;
+material.map = doorColorTexture;
+material.aoMap = doorAmbientOcclusionTexture;
+
+gui.add(material, "metalness").min(0).max(1).step(0.0001);
+gui.add(material, "roughness").min(0).max(1).step(0.0001);
+
+/**
+ * objects
+ */
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
 sphere.position.x = -1.5;
+sphere.geometry.setAttribute(
+  "uv2",
+  new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2)
+);
 
 const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
+plane.geometry.setAttribute(
+  "uv2",
+  new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
+);
 
 const torus = new THREE.Mesh(
   new THREE.TorusGeometry(0.3, 0.2, 16, 32), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
   material
 );
 torus.position.x = 1.5;
+torus.geometry.setAttribute(
+  "uv2",
+  new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2)
+);
 
 scene.add(sphere, plane, torus);
+
+/**
+ * lights
+ */
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // ambient 环境（应该就是环境光的意思）
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.y = 3;
+pointLight.position.z = 4;
+scene.add(pointLight);
 
 // set sizes
 const sizes = {
