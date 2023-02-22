@@ -1,6 +1,6 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
-import { PointLight } from "./three.module.js";
+import { AlphaFormat, PointLight } from "./three.module.js";
 
 /**
  * gui
@@ -14,17 +14,39 @@ const scene = new THREE.Scene();
  * textureLoader
  */
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
-const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
-const gradientTexture = textureLoader.load("./public/textures/gradients/5.jpg");
+const doorNormalTexture = textureLoader.load(
+  "./public/textures/door/normal.jpg"
+);
 const doorAmbientOcclusionTexture = textureLoader.load(
   "./public/textures/door/ambientOcclusion.jpg"
 );
+const doorHeightTexture = textureLoader.load(
+  "./public/textures/door/height.jpg"
+);
+const doorMetalnessTexture = textureLoader.load(
+  "./public/textures/door/metalness.jpg"
+);
+const doorRoughnessTexture = textureLoader.load(
+  "./public/textures/door/roughness.jpg"
+);
+const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
+const gradientTexture = textureLoader.load("./public/textures/gradients/5.jpg");
 gradientTexture.minFilter = THREE.NearestFilter;
 gradientTexture.magFilter = THREE.NearestFilter;
 gradientTexture.generateMipmaps = false;
+
+const enviormentMapTexture = cubeTextureLoader.load([
+  "./public/textures/environmentMaps/0/px.jpg",
+  "./public/textures/environmentMaps/0/py.jpg",
+  "./public/textures/environmentMaps/0/pz.jpg",
+  "./public/textures/environmentMaps/0/nx.jpg",
+  "./public/textures/environmentMaps/0/ny.jpg",
+  "./public/textures/environmentMaps/0/nz.jpg",
+]);
 
 /**
  * textures
@@ -58,30 +80,42 @@ gradientTexture.generateMipmaps = false;
 const material = new THREE.MeshStandardMaterial();
 material.metalness = 0.4;
 material.roughness = 0.2;
-material.map = doorColorTexture;
-material.aoMap = doorAmbientOcclusionTexture;
+// material.map = doorColorTexture;
+// material.aoMap = doorAmbientOcclusionTexture; // Ambient Occlusion 环境遮挡
+// material.aoMapIntensity = 1; // intensity 强度
+// material.displacementMap = doorHeightTexture; // displacement 位移
+// material.displacementScale = 0.05; // 位移缩放
+// material.metalnessMap = doorMetalnessTexture;
+// material.roughnessMap = doorRoughnessTexture;
+// material.normalMap = doorNormalTexture;
+// material.normalScale.set(0.5, 0.5);
+// material.transparent = true;
+// material.alphaMap = doorAlphaTexture;
+// material.color = new THREE.Color("gold");
+material.envMap = enviormentMapTexture;
 
 gui.add(material, "metalness").min(0).max(1).step(0.0001);
 gui.add(material, "roughness").min(0).max(1).step(0.0001);
+gui.add(material, "displacementScale").min(0).max(1).step(0.0001);
 
 /**
  * objects
  */
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
 sphere.position.x = -1.5;
 sphere.geometry.setAttribute(
   "uv2",
   new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2)
 );
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 100, 100), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
 plane.geometry.setAttribute(
   "uv2",
   new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
 );
 
 const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3, 0.2, 16, 32), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
+  new THREE.TorusGeometry(0.3, 0.2, 64, 128), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
   material
 );
 torus.position.x = 1.5;
@@ -152,13 +186,13 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
 
   // update objects
-  sphere.rotation.x = elapsedTime * 0.2;
-  plane.rotation.x = elapsedTime * 0.2;
-  torus.rotation.x = elapsedTime * 0.2;
+  // sphere.rotation.x = elapsedTime * 0.2;
+  // plane.rotation.x = elapsedTime * 0.2;
+  // torus.rotation.x = elapsedTime * 0.2;
 
-  sphere.rotation.y = elapsedTime * 0.2;
-  plane.rotation.y = elapsedTime * 0.2;
-  torus.rotation.y = elapsedTime * 0.2;
+  // sphere.rotation.y = elapsedTime * 0.2;
+  // plane.rotation.y = elapsedTime * 0.2;
+  // torus.rotation.y = elapsedTime * 0.2;
 
   // update controls
   controls.update(); // 要实时更新控制器，否则控制器无效
