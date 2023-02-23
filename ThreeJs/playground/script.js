@@ -1,6 +1,7 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
-import { AlphaFormat, PointLight } from "./three.module.js";
+import { FontLoader } from "./FontLoader.js";
+import { TextGeometry } from "./TextGeometry.js";
 
 /**
  * gui
@@ -15,116 +16,70 @@ const scene = new THREE.Scene();
  */
 const textureLoader = new THREE.TextureLoader();
 const cubeTextureLoader = new THREE.CubeTextureLoader();
-
-const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
-const doorAlphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
-const doorNormalTexture = textureLoader.load(
-  "./public/textures/door/normal.jpg"
-);
-const doorAmbientOcclusionTexture = textureLoader.load(
-  "./public/textures/door/ambientOcclusion.jpg"
-);
-const doorHeightTexture = textureLoader.load(
-  "./public/textures/door/height.jpg"
-);
-const doorMetalnessTexture = textureLoader.load(
-  "./public/textures/door/metalness.jpg"
-);
-const doorRoughnessTexture = textureLoader.load(
-  "./public/textures/door/roughness.jpg"
-);
-const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
-const gradientTexture = textureLoader.load("./public/textures/gradients/5.jpg");
-gradientTexture.minFilter = THREE.NearestFilter;
-gradientTexture.magFilter = THREE.NearestFilter;
-gradientTexture.generateMipmaps = false;
-
-const enviormentMapTexture = cubeTextureLoader.load([
-  "./public/textures/environmentMaps/0/px.jpg",
-  "./public/textures/environmentMaps/0/py.jpg",
-  "./public/textures/environmentMaps/0/pz.jpg",
-  "./public/textures/environmentMaps/0/nx.jpg",
-  "./public/textures/environmentMaps/0/ny.jpg",
-  "./public/textures/environmentMaps/0/nz.jpg",
-]);
+const matcapTexture = textureLoader.load("./public/textures/matcaps/7.png");
 
 /**
  * textures
  */
-// const material = new THREE.MeshBasicMaterial();
-// material.map = doorColorTexture;
-// // material.color.set("pink"); // 或 material.color = new THREE.Color('pink')
-// // material.opacity = 0.5; // 必须和 transparent 一起用才有效果
-// material.transparent = true;
-// material.alphaMap = doorAlphaTexture;
-// material.side = THREE.DoubleSide; // 或 THREE.BackSide
 
-// const material = new THREE.MeshNormalMaterial(); // 用来显示每个面的法向，从而判断关照反射等效果产生哪些影响
-// // material.wireframe = true;
-// // material.flatShading = true;
+/**
+ * fonts
+ */
+const fontLoader = new FontLoader();
+fontLoader.load("./helvetiker_regular.typeface.json", (font) => {
+  const textGeometry = new TextGeometry("Hello lanlan", {
+    font,
+    size: 0.5,
+    height: 0.2,
+    surveSegments: 5,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegment: 4,
+  });
 
-// const material = new THREE.MeshMatcapMaterial();  // matcap 材质捕获
-// material.matcap = matcapTexture;
+  // 将文字居中
+  // textGeometry.computeBoundingBox();
+  // textGeometry.translate(
+  //   -(textGeometry.boundingBox.max.x - 0.02) * 0.5, // x y 都减去 bevelSize
+  //   -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
+  //   -(textGeometry.boundingBox.max.z - 0.03) * 0.5 // z 减去 bevelThickness
+  // ); // 将文字最外面包裹的 boundingBox 最大 x y z 都挪动一半
+  // 或
+  textGeometry.center(); // 就可以解决掉上面的一大堆问题
 
-// const material = new THREE.MeshDepthMaterial(); // 相机距离对象越近，对象越白，反之越黑
+  // const textMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
+  const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
 
-// const material = new THREE.MeshLambertMaterial();
+  const text = new THREE.Mesh(textGeometry, material);
+  scene.add(text);
 
-// const material = new THREE.MeshPhongMaterial();
-// material.shininess = 1000; // 效果类似于表面粗糙度，数值越大越光滑
-// material.specular = new THREE.Color(0xff0000); // 修改材质反光颜色
+  const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
 
-// const material = new THREE.MeshToonMaterial(); // 卡通效果
-// material.gradientMap = gradientTexture;
+  for (let i = 0; i < 500; i++) {
+    const donut = new THREE.Mesh(donutGeometry, material);
+    donut.position.x = (Math.random() - 0.5) * 100;
+    donut.position.y = (Math.random() - 0.5) * 100;
+    donut.position.z = (Math.random() - 0.5) * 100;
+    donut.rotation.x = Math.PI * Math.random();
+    donut.rotation.y = Math.PI * Math.random();
+    donut.rotation.z = Math.PI * Math.random();
+    const scale = Math.random();
+    donut.scale.set(scale, scale, scale);
+    scene.add(donut);
+  }
+});
 
-const material = new THREE.MeshStandardMaterial();
-material.metalness = 0.4;
-material.roughness = 0.2;
-// material.map = doorColorTexture;
-// material.aoMap = doorAmbientOcclusionTexture; // Ambient Occlusion 环境遮挡
-// material.aoMapIntensity = 1; // intensity 强度
-// material.displacementMap = doorHeightTexture; // displacement 位移
-// material.displacementScale = 0.05; // 位移缩放
-// material.metalnessMap = doorMetalnessTexture;
-// material.roughnessMap = doorRoughnessTexture;
-// material.normalMap = doorNormalTexture;
-// material.normalScale.set(0.5, 0.5);
-// material.transparent = true;
-// material.alphaMap = doorAlphaTexture;
-// material.color = new THREE.Color("gold");
-material.envMap = enviormentMapTexture;
-
-gui.add(material, "metalness").min(0).max(1).step(0.0001);
-gui.add(material, "roughness").min(0).max(1).step(0.0001);
-gui.add(material, "displacementScale").min(0).max(1).step(0.0001);
+/**
+ * axes helper
+ */
+// const axesHelper = new THREE.AxesHelper();
+// scene.add(axesHelper);
 
 /**
  * objects
  */
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
-sphere.position.x = -1.5;
-sphere.geometry.setAttribute(
-  "uv2",
-  new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2)
-);
-
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 100, 100), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
-plane.geometry.setAttribute(
-  "uv2",
-  new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
-);
-
-const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3, 0.2, 64, 128), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
-  material
-);
-torus.position.x = 1.5;
-torus.geometry.setAttribute(
-  "uv2",
-  new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2)
-);
-
-scene.add(sphere, plane, torus);
 
 /**
  * lights
@@ -184,15 +139,6 @@ let clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
-
-  // update objects
-  // sphere.rotation.x = elapsedTime * 0.2;
-  // plane.rotation.x = elapsedTime * 0.2;
-  // torus.rotation.x = elapsedTime * 0.2;
-
-  // sphere.rotation.y = elapsedTime * 0.2;
-  // plane.rotation.y = elapsedTime * 0.2;
-  // torus.rotation.y = elapsedTime * 0.2;
 
   // update controls
   controls.update(); // 要实时更新控制器，否则控制器无效
