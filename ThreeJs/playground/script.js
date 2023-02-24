@@ -16,60 +16,17 @@ const scene = new THREE.Scene();
  */
 const textureLoader = new THREE.TextureLoader();
 const cubeTextureLoader = new THREE.CubeTextureLoader();
-const matcapTexture = textureLoader.load("./public/textures/matcaps/7.png");
+const matcapTexture = textureLoader.load("./public/textures/matcaps/8.png");
 
 /**
  * textures
  */
 
 /**
- * fonts
+ * material
  */
-const fontLoader = new FontLoader();
-fontLoader.load("./helvetiker_regular.typeface.json", (font) => {
-  const textGeometry = new TextGeometry("Hello lanlan", {
-    font,
-    size: 0.5,
-    height: 0.2,
-    surveSegments: 5,
-    bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelOffset: 0,
-    bevelSegment: 4,
-  });
-
-  // 将文字居中
-  // textGeometry.computeBoundingBox();
-  // textGeometry.translate(
-  //   -(textGeometry.boundingBox.max.x - 0.02) * 0.5, // x y 都减去 bevelSize
-  //   -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
-  //   -(textGeometry.boundingBox.max.z - 0.03) * 0.5 // z 减去 bevelThickness
-  // ); // 将文字最外面包裹的 boundingBox 最大 x y z 都挪动一半
-  // 或
-  textGeometry.center(); // 就可以解决掉上面的一大堆问题
-
-  // const textMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
-  const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
-
-  const text = new THREE.Mesh(textGeometry, material);
-  scene.add(text);
-
-  const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
-
-  for (let i = 0; i < 500; i++) {
-    const donut = new THREE.Mesh(donutGeometry, material);
-    donut.position.x = (Math.random() - 0.5) * 100;
-    donut.position.y = (Math.random() - 0.5) * 100;
-    donut.position.z = (Math.random() - 0.5) * 100;
-    donut.rotation.x = Math.PI * Math.random();
-    donut.rotation.y = Math.PI * Math.random();
-    donut.rotation.z = Math.PI * Math.random();
-    const scale = Math.random();
-    donut.scale.set(scale, scale, scale);
-    scene.add(donut);
-  }
-});
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.4;
 
 /**
  * axes helper
@@ -81,18 +38,44 @@ fontLoader.load("./helvetiker_regular.typeface.json", (font) => {
  * objects
  */
 
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
+sphere.position.x = -1.5;
+
+const plane = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(6, 6, 100, 100),
+  material
+);
+ground.rotation.x = Math.PI * -0.5;
+ground.position.y = -1.5;
+
+const torus = new THREE.Mesh(
+  new THREE.TorusGeometry(0.3, 0.2, 64, 128), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
+  material
+);
+torus.position.x = 1.5;
+
+scene.add(sphere, plane, torus, ground);
+
 /**
  * lights
  */
-
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // ambient 环境（应该就是环境光的意思）
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 0.5);
-pointLight.position.x = 2;
-pointLight.position.y = 3;
-pointLight.position.z = 4;
+const directionalLight = new THREE.DirectionalLight(0x00fffc, 0.3);
+directionalLight.position.set(1, 0.25, 0);
+scene.add(directionalLight);
+
+const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3); // 用于蓝天绿草的环境光效
+scene.add(hemisphereLight);
+
+const pointLight = new THREE.PointLight(0xff9000, 0.5, 10, 2);
+pointLight.position.set(1, -0.5, 1);
 scene.add(pointLight);
+
+const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 1, 1);
+scene.add(rectAreaLight);
 
 // set sizes
 const sizes = {
@@ -139,6 +122,14 @@ let clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
+
+  sphere.rotation.x = elapsedTime * 0.2;
+  plane.rotation.x = elapsedTime * 0.2;
+  torus.rotation.x = elapsedTime * 0.2;
+
+  sphere.rotation.y = elapsedTime * 0.2;
+  plane.rotation.y = elapsedTime * 0.2;
+  torus.rotation.y = elapsedTime * 0.2;
 
   // update controls
   controls.update(); // 要实时更新控制器，否则控制器无效

@@ -1138,3 +1138,9 @@ tick();
 ```
 
 bookmark : 2023-02-23 P13 完成。
+
+### P14 : Live (用的 Vercel)
+
+### P15 : Lights
+
+bookmark : 2023-02-24 P15 听到 21:00。
