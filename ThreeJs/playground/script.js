@@ -1,132 +1,173 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
-import { RectAreaLightHelper } from "./RectAreaLightHelper.js";
 
 /**
- * gui
+ * Base
  */
+// Debug
 const gui = new dat.GUI();
 
-// scene
+// Canvas
+const canvas = document.querySelector("canvas.webgl");
+
+// Scene
 const scene = new THREE.Scene();
 
 /**
- * textureLoader
+ * Lights
  */
-const textureLoader = new THREE.TextureLoader();
-const cubeTextureLoader = new THREE.CubeTextureLoader();
-const matcapTexture = textureLoader.load("./public/textures/matcaps/8.png");
-
-/**
- * textures
- */
-
-/**
- * material
- */
-const material = new THREE.MeshStandardMaterial();
-material.roughness = 0.8;
-
-/**
- * axes helper
- */
-// const axesHelper = new THREE.AxesHelper();
-// scene.add(axesHelper);
-
-/**
- * objects
- */
-
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material); // THREE.SphereBufferGeometry has been renamed to THREE.SphereGeometry.
-sphere.position.x = -1.5;
-
-const plane = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(6, 6, 100, 100),
-  material
-);
-ground.rotation.x = Math.PI * -0.5;
-ground.position.y = -1.5;
-
-const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3, 0.2, 64, 128), // THREE.TorusBufferGeometry has been renamed to THREE.TorusGeometry.
-  material
-);
-torus.position.x = 1.5;
-
-scene.add(sphere, plane, torus, ground);
-
-/**
- * lights
- */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(1, 0.25, 0);
+// Directional light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+directionalLight.position.set(2, 2, -1);
+gui.add(directionalLight, "intensity").min(0).max(1).step(0.001);
+gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001);
+gui.add(directionalLight.position, "y").min(-5).max(5).step(0.001);
+gui.add(directionalLight.position, "z").min(-5).max(5).step(0.001);
 scene.add(directionalLight);
 
-// set sizes
+directionalLight.castShadow = true; // 方向光启用阴影投射
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
+directionalLight.shadow.camera.top = 2;
+directionalLight.shadow.camera.right = 2;
+directionalLight.shadow.camera.bottom = -2;
+directionalLight.shadow.camera.left = -2;
+directionalLight.shadow.camera.near = 1;
+directionalLight.shadow.camera.far = 6;
+// directionalLight.shadow.radius = 10;
+
+const directionalLightCameraHelper = new THREE.CameraHelper(
+  directionalLight.shadow.camera
+);
+directionalLightCameraHelper.visible = false;
+scene.add(directionalLightCameraHelper);
+
+// Spot Light
+const spotLight = new THREE.SpotLight(0xffffff, 0.4, 10, Math.PI * 0.3);
+spotLight.castShadow = true;
+spotLight.shadow.mapSize.width = 1024;
+spotLight.shadow.mapSize.height = 1024;
+spotLight.shadow.fav = 30;
+spotLight.shadow.near = 1;
+spotLight.shadow.far = 6;
+spotLight.position.set(0, 2, 2);
+scene.add(spotLight);
+scene.add(spotLight.target);
+
+const spotLightCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera);
+spotLightCameraHelper.visible = false;
+scene.add(spotLightCameraHelper);
+
+// Point Light
+const pointLight = new THREE.PointLight(0xffffff, 0.3);
+pointLight.castShadow = true;
+pointLight.shadow.mapSize.width = 1024;
+pointLight.shadow.mapSize.height = 1024;
+pointLight.shadow.camera.near = 0.1;
+pointLight.shadow.camera.far = 5;
+
+pointLight.position.set(-1, 1, 0);
+scene.add(pointLight);
+
+const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
+pointLightCameraHelper.visible = false;
+scene.add(pointLightCameraHelper);
+
+/**
+ * Materials
+ */
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.7;
+gui.add(material, "metalness").min(0).max(1).step(0.001);
+gui.add(material, "roughness").min(0).max(1).step(0.001);
+
+/**
+ * Objects
+ */
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
+sphere.castShadow = true; // 启用阴影投射
+
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
+plane.rotation.x = -Math.PI * 0.5;
+plane.position.y = -0.5;
+plane.receiveShadow = true; // 启用阴影接收
+
+scene.add(sphere, plane);
+
+/**
+ * Sizes
+ */
 const sizes = {
-  // 获取 window 宽高为全屏显示做准备
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-// 监听 window 尺寸变化，更新相机 aspect 并重新渲染
 window.addEventListener("resize", () => {
+  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  // 在 window 尺寸更新后，更新 camera aspect 并重新渲染，确保窗口更新后画面更新
+  // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // update renderer
+  // Update renderer
   renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 获取显示器像素比率并将其限制屏幕像素比率在 2 以内，放在该位置可以使页面在扩展显示器间拖动时，实时监测显示器像素比率
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-// camera
-
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
-
-camera.position.z = 3;
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+camera.position.x = 1;
+camera.position.y = 1;
+camera.position.z = 2;
 scene.add(camera);
 
-// create renderer
-const canvas = document.querySelector(".webgl");
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+/**
+ * Renderer
+ */
 const renderer = new THREE.WebGLRenderer({
-  canvas: canvas, // 键值跟变量名相同的时候可以省略变量名
+  canvas: canvas,
 });
-
-// controls
-const controls = new OrbitControls(camera, canvas); // 给 camera 和 canvas 添加 轨道控制 类型的 controls
-controls.enableDamping = true; // 给控制器开启阻尼
-
 renderer.setSize(sizes.width, sizes.height);
-renderer.render(scene, camera);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-let clock = new THREE.Clock();
+renderer.shadowMap.enabled = true; // 启用渲染器阴影处理
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 当使用这种 shadowMap 时，shadow.radius 不起作用
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock();
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime(); // elapsed：经过时间
+  const elapsedTime = clock.getElapsedTime();
 
-  sphere.rotation.x = elapsedTime * 0.2;
-  plane.rotation.x = elapsedTime * 0.2;
-  torus.rotation.x = elapsedTime * 0.2;
+  // Update controls
+  controls.update();
 
-  sphere.rotation.y = elapsedTime * 0.2;
-  plane.rotation.y = elapsedTime * 0.2;
-  torus.rotation.y = elapsedTime * 0.2;
-
-  // update controls
-  controls.update(); // 要实时更新控制器，否则控制器无效
-
-  // update renderer
+  // Render
   renderer.render(scene, camera);
 
-  window.requestAnimationFrame(tick); // window.requestAnimationFrame() 告诉浏览器——你希望执行一个动画，并且要求浏览器在下次重绘之前调用指定的回调函数更新动画。回调函数执行次数通常是每秒 60 次，但在大多数遵循 W3C 建议的浏览器中，回调函数执行次数通常与浏览器屏幕刷新次数相匹配。https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick);
 };
 
 tick();
