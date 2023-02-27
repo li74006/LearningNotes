@@ -1,7 +1,6 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
-import { FontLoader } from "./FontLoader.js";
-import { TextGeometry } from "./TextGeometry.js";
+import { RectAreaLightHelper } from "./RectAreaLightHelper.js";
 
 /**
  * gui
@@ -26,7 +25,7 @@ const matcapTexture = textureLoader.load("./public/textures/matcaps/8.png");
  * material
  */
 const material = new THREE.MeshStandardMaterial();
-material.roughness = 0.4;
+material.roughness = 0.8;
 
 /**
  * axes helper
@@ -63,19 +62,9 @@ scene.add(sphere, plane, torus, ground);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0x00fffc, 0.3);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(1, 0.25, 0);
 scene.add(directionalLight);
-
-const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3); // 用于蓝天绿草的环境光效
-scene.add(hemisphereLight);
-
-const pointLight = new THREE.PointLight(0xff9000, 0.5, 10, 2);
-pointLight.position.set(1, -0.5, 1);
-scene.add(pointLight);
-
-const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 1, 1);
-scene.add(rectAreaLight);
 
 // set sizes
 const sizes = {
