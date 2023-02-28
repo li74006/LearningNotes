@@ -2,6 +2,12 @@
 import { OrbitControls } from "./OrbitControls.js";
 
 /**
+ * Textures
+ */
+const textureLoader = new THREE.textureLoader();
+const bakedShadow = textureLoader.load("./public/")
+
+/**
  * Base
  */
 // Debug
