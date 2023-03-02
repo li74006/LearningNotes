@@ -24,6 +24,7 @@ const particleTexture = textureLoader.load("./public/textures/particles/2.png");
  */
 let parameters = {};
 parameters.count = 1000;
+parameters.size = 0.02;
 
 // Geometry
 const generateGalaxy = () => {
@@ -35,7 +36,18 @@ const generateGalaxy = () => {
     positions[i3 + 1] = Math.random();
     positions[i3 + 2] = Math.random();
   }
-  console.log(positions);
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3) // 3 代表每个顶点有多少数值
+  );
+
+  // materials
+  const material = new THREE.PointsMaterial({
+    size: parameters.size,
+    sizeAttenuation: true,
+    depthWrite: false,
+  });
 };
 
 generateGalaxy();
