@@ -581,3 +581,9 @@ bookmark : 2023-2-26 E3 看到 14:57 ~
 > 选中某个对象 > I > 选择 Location > 为该对象位置添加关键帧。
 
 bookmark : 2023-2-27 E3 看完 ~ 渲染实在太慢了！
+
+### E4 : [Beach](https://www.youtube.com/watch?v=sL9ozfAivi0&list=PLfEBMMMIwZRPrsgEvUU_tNvWrBzrDUqoM&index=42&t=29s)
+
+> 选择某个点 > G × 2 > 使其沿某边滑移 > 按住 Alt > 使该点沿着该边滑移出其外边。
+
+bookmark : 2023-3-2 E4 画完，渲染嗷嗷慢，希望明天能出片 👺
