@@ -7,6 +7,9 @@ import { OrbitControls } from "./OrbitControls.js";
 // Debug
 const gui = new dat.GUI();
 
+let parameters = {};
+parameters.color = "#ffeded";
+
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
 
@@ -16,29 +19,82 @@ const scene = new THREE.Scene();
 /**
  * Objects
  */
-const object1 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshBasicMaterial({ color: "#ff0000" })
-);
-object1.position.x = -2;
+// const cube = new THREE.Mesh(
+//   new THREE.BoxGeometry(),
+//   new THREE.MeshBasicMaterial({
+//     color: "red",
+//   })
+// );
 
-const object2 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshBasicMaterial({ color: "#ff0000" })
+// Materials
+const textureLoader = new THREE.TextureLoader();
+const gradientTexture = textureLoader.load("./public/textures/gradients/3.jpg");
+gradientTexture.magFilter = THREE.NearestFilter;
+
+const material = new THREE.MeshToonMaterial({
+  color: parameters.color,
+  gradientMap: gradientTexture,
+});
+
+const objectsDistance = 4;
+
+const mesh1 = new THREE.Mesh(new THREE.TorusGeometry(1, 0.4, 16, 60), material);
+const mesh2 = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 32), material);
+const mesh3 = new THREE.Mesh(
+  new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16),
+  material
 );
 
-const object3 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshBasicMaterial({ color: "#ff0000" })
-);
-object3.position.x = 2;
+mesh2.position.y = -objectsDistance * 1;
+mesh3.position.y = -objectsDistance * 2;
 
-scene.add(object1, object2, object3);
+mesh1.position.x = 2;
+mesh2.position.x = -2;
+mesh3.position.x = 2;
+
+scene.add(mesh1, mesh2, mesh3);
+
+const sectionMeshs = [mesh1, mesh2, mesh3];
+
+const particlesCount = 2000;
+const positions = new Float32Array(particlesCount * 3);
+
+for (let i = 0; i < particlesCount; i++) {
+  positions[i * 3] = (Math.random() - 0.5) * 10;
+  positions[i * 3 + 1] =
+    objectsDistance * 0.5 -
+    Math.random() * objectsDistance * sectionMeshs.length;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+}
+
+const particlesGeometry = new THREE.BufferGeometry();
+particlesGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(positions, 3)
+);
+
+const particlesMaterial = new THREE.PointsMaterial({
+  color: parameters.color,
+  sizeAttenuation: true,
+  size: 0.03,
+});
+
+const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles);
+/**
+ * Lights
+ */
+const directionalLight = new THREE.DirectionalLight("#ffffff", 1);
+directionalLight.position.set(1, 1, 0);
+scene.add(directionalLight);
 
 /**
- * Raycaster
+ * gui
  */
-const raycaster = new THREE.Raycaster();
+gui.addColor(parameters, "color").onChange(() => {
+  material.color.set(parameters.color);
+  particlesMaterial.color.set(parameters.color);
+});
 
 /**
  * Sizes
@@ -63,48 +119,63 @@ window.addEventListener("resize", () => {
 });
 
 /**
- * Mouse
+ * Scroll
  */
-const mouse = new THREE.Vector2();
-window.addEventListener("mousemove", (e) => {
-  mouse.x = (e.clientX / sizes.width) * 2 - 1;
-  mouse.y = -(e.clientY / sizes.height) * 2 + 1;
+let scrollY = window.scrollY;
+let currentSection = 0;
+
+window.addEventListener("scroll", () => {
+  scrollY = window.scrollY;
+
+  const newSection = Math.round(scrollY / sizes.height);
+  if (newSection !== currentSection) {
+    currentSection = newSection;
+    gsap.to(sectionMeshs[currentSection].rotation, {
+      duration: 1.5,
+      ease: "power2.inOut",
+      x: "+=6",
+      y: "+=3",
+      z: "+=1.5",
+    });
+  }
 });
 
-window.addEventListener("click", () => {
-  if (currentIntersect) {
-    if (currentIntersect.object === object1) {
-      console.log("click obj1");
-    } else if (currentIntersect.object === object2) {
-      console.log("click obj2");
-    } else if (currentIntersect.object === object3) {
-      console.log("click obj3");
-    }
-  }
+/**
+ * Cursor
+ */
+const cursor = {};
+cursor.x = 0;
+cursor.y = 0;
+window.addEventListener("mousemove", (e) => {
+  cursor.x = e.clientX / sizes.width - 0.5;
+  cursor.y = e.clientY / sizes.height - 0.5;
 });
 
 /**
  * Camera
  */
+const cameraGroup = new THREE.Group();
+scene.add(cameraGroup);
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  35,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.z = 3;
-scene.add(camera);
+camera.position.z = 6;
+cameraGroup.add(camera);
 
 // Controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
+// const controls = new OrbitControls(camera, canvas);
+// controls.enableDamping = true;
 
 /**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  alpha: true, // canvas 背景色变为透明
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -114,47 +185,27 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  */
 const clock = new THREE.Clock();
 
-let currentIntersect = null;
+let previousTime = 0;
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+  const deltaTime = elapsedTime - previousTime;
+  previousTime = elapsedTime; // 解决不同屏幕刷新率不同导致的 easing 速度不一致问题
 
-  object1.position.y = Math.sin(elapsedTime * 0.3) * 1.5;
-  object2.position.y = Math.cos(elapsedTime * 0.3) * 1.5;
-  object3.position.y = Math.sin(elapsedTime * 0.3) * 1.5;
+  camera.position.y = (-scrollY / sizes.height) * objectsDistance;
 
-  raycaster.setFromCamera(mouse, camera);
+  const parallaxX = cursor.x * 0.3;
+  const parallaxY = -cursor.y * 0.3;
+  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * deltaTime;
+  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * deltaTime;
 
-  // const rayOrigin = new THREE.Vector3(-3, 0, 0);
-  // const rayDirection = new THREE.Vector3(1, 0, 0);
-  // rayDirection.normalize();
-  // raycaster.set(rayOrigin, rayDirection);
-
-  const objectsToTest = [object1, object2, object3];
-  const intersects = raycaster.intersectObjects(objectsToTest);
-
-  if (intersects.length) {
-    if (currentIntersect === null) {
-      console.log("mouse enter");
-    }
-    currentIntersect = intersects[0];
-  } else {
-    if (currentIntersect) {
-      console.log("mouse leave");
-    }
-    currentIntersect = null;
-  }
-
-  for (const obj of objectsToTest) {
-    obj.material.color.set("#ff0000");
-  }
-
-  for (const intersect of intersects) {
-    intersect.object.material.color.set("#0000ff");
+  for (const mesh of sectionMeshs) {
+    mesh.rotation.x += deltaTime * 0.1;
+    mesh.rotation.y += deltaTime * 0.12;
   }
 
   // Update controls
-  controls.update();
+  // controls.update();
 
   // Render
   renderer.render(scene, camera);
