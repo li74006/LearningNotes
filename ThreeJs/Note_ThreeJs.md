@@ -2332,3 +2332,8 @@ bookmark : 2023-03-03 P21 完成。
 4. Box2D.js
 
 bookmark : 2023-03-04 P22 听到 30min，操过点了，没 push 到今天！！！
+
+Physijs 这个库也行。
+Cannon-es 是 Cannon.js 的 folk，可以接着用~
+
+bookmark : 2023-03-05 P22 终于听完了，快了，就快熬出头了！👺
