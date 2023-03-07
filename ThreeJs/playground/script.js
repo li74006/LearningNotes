@@ -2,9 +2,9 @@
 import { OrbitControls } from "./OrbitControls.js";
 import { GLTFLoader } from "./GLTFLoader.js";
 
-import sizes from "./Experience/Utils/Sizes.js";
+import Experience from "./Experience/Experience.js";
 
-new sizes();
+new Experience();
 
 // /**
 //  * Loaders

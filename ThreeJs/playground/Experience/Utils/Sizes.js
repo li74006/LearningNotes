@@ -1,5 +1,9 @@
-export default class Sizes {
+import EventEmitter from "./EventEmitter.js";
+
+export default class Sizes extends EventEmitter {
   constructor() {
+    super();
+
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.pixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -9,7 +13,7 @@ export default class Sizes {
       this.height = window.innerHeight;
       this.pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-      console.log(this);
+      this.trigger("resize");
     });
   }
 }

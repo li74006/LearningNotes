@@ -1,4 +1,4 @@
-import Sizes from "./Utils/Sizes";
+import Sizes from "./Utils/Sizes.js";
 
 export default class Experience {
   constructor(canvas) {
@@ -7,5 +7,9 @@ export default class Experience {
     this.canvas = canvas;
 
     this.sizes = new Sizes();
+
+    this.sizes.on("resize", () => {
+      console.log("resized");
+    });
   }
 }
