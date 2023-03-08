@@ -9,7 +9,7 @@ export default class Fox {
     this.time = this.experience.time;
     this.debug = this.experience.debug;
 
-    if (this.debug.ac) {
+    if (this.debug.active) {
       this.debugFolder = this.debug.ui.addFolder("fox");
     }
 
@@ -56,7 +56,27 @@ export default class Fox {
 
       newAction.reset();
       newAction.play();
+      newAction.crossFadeFrom(oldAction, 1);
+
+      this.animation.actions.current = newAction;
     };
+
+    if (this.debug.active) {
+      const debugObject = {
+        playIdle: () => {
+          this.animation.play("idle");
+        },
+        playWalking: () => {
+          this.animation.play("walking");
+        },
+        playRunning: () => {
+          this.animation.play("running");
+        },
+      };
+      this.debugFolder.add(debugObject, "playIdle");
+      this.debugFolder.add(debugObject, "playWalking");
+      this.debugFolder.add(debugObject, "playRunning");
+    }
   }
 
   update() {

@@ -2753,6 +2753,15 @@ const tick = () => {
 tick();
 ```
 
-bookmark : 2023-03-06 P25 听完，这个真听迷糊了。
+bookmark : 2023-03-07 P25 听完，这个真听迷糊了。
 
 ### P26 : Code Structuring for Bigger Projects
+
+本节代码：
+
+```js
+import Experience from "./Experience/Experience.js";
+const experience = new Experience(document.querySelector("canvas.webgl"));
+```
+
+bookmark : 2023-03-08 P26 终于听完了卧槽，终于听完了！！！加油啊！！！🤑

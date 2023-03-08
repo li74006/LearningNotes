@@ -6,7 +6,6 @@ import Renderer from "./Renderer.js";
 import World from "./World/World.js";
 import Resources from "./Utils/Resources.js";
 import sources from "./sources.js";
-import debug from "./Utils/Debug.js";
 import Debug from "./Utils/Debug.js";
 
 let instance = null;
@@ -49,5 +48,31 @@ export default class Experience {
     this.camera.update();
     this.world.update();
     this.renderer.update();
+  }
+
+  destory() {
+    this.sizes.off("resize");
+    this.time.off("tick");
+
+    this.scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+
+        for (const key in child.material) {
+          const value = child.material[key];
+          if (value && typeof value.dispose === "function") {
+            value.dispose();
+          }
+        }
+      }
+    });
+
+    this.camera.controls.dispose();
+    this.renderer.instance.dispose();
+
+    if (this.debug.active) {
+      console.log(this.debug.ui.destroy());
+      this.debug.ui.destroy();
+    }
   }
 }

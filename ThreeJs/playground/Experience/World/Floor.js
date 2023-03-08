@@ -1,6 +1,5 @@
 import * as THREE from "../../three.module.js";
 import Experience from "../Experience.js";
-import Environment from "./Environment.js";
 
 export default class Floor {
   constructor() {
