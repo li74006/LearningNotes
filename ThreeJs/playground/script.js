@@ -1,10 +1,9 @@
 // import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import { OrbitControls } from "./OrbitControls.js";
 import { GLTFLoader } from "./GLTFLoader.js";
-
 import Experience from "./Experience/Experience.js";
 
-new Experience();
+const experience = new Experience(document.querySelector("canvas.webgl"));
 
 // /**
 //  * Loaders
