@@ -50,7 +50,7 @@ const material = new THREE.RawShaderMaterial({
     gl_FragColor = vec4(1.0, 0.5,0.3,1.0);
   }
   `,
-  wireFrame: true,
+  wireframe: true,
 });
 
 // Mesh

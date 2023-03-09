@@ -2767,3 +2767,5 @@ const experience = new Experience(document.querySelector("canvas.webgl"));
 bookmark : 2023-03-08 P26 终于听完了卧槽，终于听完了！！！加油啊！！！🤑
 
 ### P27 : Shaders
+
+vec4 的第四个参数跟透视有关，有个专业术语叫 homogeneous coordinates.
