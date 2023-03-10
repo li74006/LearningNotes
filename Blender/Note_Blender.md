@@ -591,3 +591,7 @@ bookmark : 2023-3-2 E4 画完，渲染嗷嗷慢，希望明天能出片 👺
 ### E5 : [Bilbo Baggins' House](https://www.youtube.com/watch?v=rz0VxQJyzV4&list=PLfEBMMMIwZRPrsgEvUU_tNvWrBzrDUqoM&index=58&t=7s)
 
 bookmark : 2023-3-6 E5 开始，看到 3min 了~
+
+> 点模式下选中一批点 > S + Z + 0 > 该批点会沿着 Z 轴转换为平面。
+
+bookmark : 2023-3-10 E5 看到 7:30 了~
