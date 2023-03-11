@@ -1,14 +1,12 @@
-// import * as THREE from "./three.module.js"; // 在 js 中引入这个好使，在 html 中引入 three.js/three.min.js 好使
 import * as THREE from "./three.module.js";
 import { OrbitControls } from "./OrbitControls.js";
-// import testVertexShader from "./Shaders/test/vertex.glsl";
-// import testFragmentShader from "./Shaders/test/fragment.glsl";
 
 /**
  * Base
  */
 // Debug
-const gui = new dat.GUI();
+const gui = new dat.GUI({ width: 340 });
+const debugObject = {};
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -17,193 +15,253 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 /**
- * Test mesh
+ * Water
  */
 // Geometry
-const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
-console.log(geometry.attributes);
+// const waterGeometry = new THREE.PlaneGeometry(2, 2, 256, 256);
+const waterGeometry = new THREE.TorusGeometry(0.3, 0.2, 90, 90);
+
+// Color
+debugObject.depthColor = "#186691";
+debugObject.surfaceColor = "#9bd8ff";
 
 // Material
-const material = new THREE.ShaderMaterial({
+const waterMaterial = new THREE.ShaderMaterial({
   vertexShader: `
-  varying vec2 vUv;
+  uniform float uTime;
+  uniform float uBigWavesElevation;
+  uniform vec2 uBigWavesFreguency;
+  uniform float uBigWavesSpeed;
 
-  void main(){
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  uniform float uSmallWavesElevation;
+  uniform float uSmallWavesFrequency;
+  uniform float uSmallWavesSpeed;
+  uniform float uSmallWavesIterations;
 
-    vUv = uv;
-  }
-  `,
-  fragmentShader: `
-  #define PI 3.1415926535897932384626433832795
+  varying float vElevation;
 
-  varying vec2 vUv;
-
-  float random(vec2 st){
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-  }
-
-  vec2 rotate(vec2 uv, float rotation, vec2 mid)
-  {
-    return vec2(
-      cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
-      cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
-    );
-  }
-
-  //	Classic Perlin 2D Noise 
-  //	by Stefan Gustavson
+  // Classic Perlin 3D Noise 
+  // by Stefan Gustavson
   //
-  vec2 fade(vec2 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
-
-  vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
-
-  float cnoise(vec2 P){
-    vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
-    vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
-    Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
-    vec4 ix = Pi.xzxz;
-    vec4 iy = Pi.yyww;
-    vec4 fx = Pf.xzxz;
-    vec4 fy = Pf.yyww;
-    vec4 i = permute(permute(ix) + iy);
-    vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
-    vec4 gy = abs(gx) - 0.5;
-    vec4 tx = floor(gx + 0.5);
-    gx = gx - tx;
-    vec2 g00 = vec2(gx.x,gy.x);
-    vec2 g10 = vec2(gx.y,gy.y);
-    vec2 g01 = vec2(gx.z,gy.z);
-    vec2 g11 = vec2(gx.w,gy.w);
-    vec4 norm = 1.79284291400159 - 0.85373472095314 * 
-      vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
-    g00 *= norm.x;
-    g01 *= norm.y;
-    g10 *= norm.z;
-    g11 *= norm.w;
-    float n00 = dot(g00, vec2(fx.x, fy.x));
-    float n10 = dot(g10, vec2(fx.y, fy.y));
-    float n01 = dot(g01, vec2(fx.z, fy.z));
-    float n11 = dot(g11, vec2(fx.w, fy.w));
-    vec2 fade_xy = fade(Pf.xy);
-    vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
-    float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
-    return 2.3 * n_xy;
+  vec4 permute(vec4 x)
+  {
+      return mod(((x*34.0)+1.0)*x, 289.0);
   }
-  
+  vec4 taylorInvSqrt(vec4 r)
+  {
+      return 1.79284291400159 - 0.85373472095314 * r;
+  }
+  vec3 fade(vec3 t)
+  {
+      return t*t*t*(t*(t*6.0-15.0)+10.0);
+  }
+
+  float cnoise(vec3 P)
+  {
+      vec3 Pi0 = floor(P); // Integer part for indexing
+      vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
+      Pi0 = mod(Pi0, 289.0);
+      Pi1 = mod(Pi1, 289.0);
+      vec3 Pf0 = fract(P); // Fractional part for interpolation
+      vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+      vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+      vec4 iy = vec4(Pi0.yy, Pi1.yy);
+      vec4 iz0 = Pi0.zzzz;
+      vec4 iz1 = Pi1.zzzz;
+
+      vec4 ixy = permute(permute(ix) + iy);
+      vec4 ixy0 = permute(ixy + iz0);
+      vec4 ixy1 = permute(ixy + iz1);
+
+      vec4 gx0 = ixy0 / 7.0;
+      vec4 gy0 = fract(floor(gx0) / 7.0) - 0.5;
+      gx0 = fract(gx0);
+      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+      vec4 sz0 = step(gz0, vec4(0.0));
+      gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+      gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+
+      vec4 gx1 = ixy1 / 7.0;
+      vec4 gy1 = fract(floor(gx1) / 7.0) - 0.5;
+      gx1 = fract(gx1);
+      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+      vec4 sz1 = step(gz1, vec4(0.0));
+      gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+      gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+
+      vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+      vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+      vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+      vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+      vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+      vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+      vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+      vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+
+      vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+      g000 *= norm0.x;
+      g010 *= norm0.y;
+      g100 *= norm0.z;
+      g110 *= norm0.w;
+      vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+      g001 *= norm1.x;
+      g011 *= norm1.y;
+      g101 *= norm1.z;
+      g111 *= norm1.w;
+
+      float n000 = dot(g000, Pf0);
+      float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+      float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+      float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+      float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+      float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+      float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+      float n111 = dot(g111, Pf1);
+
+      vec3 fade_xyz = fade(Pf0);
+      vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+      vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+      float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+      return 2.2 * n_xyz;
+  }
+
   void main(){
-    // float strength = vUv.x;
-    // float strength = vUv.y;
-    // float strength = 1.0 - vUv.x;
-    // float strength = vUv.y * 10.0;
-    // float strength = mod(vUv.y * 10.0, 1.0); // mod 求余函数
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-    // float strength = mod(vUv.y * 10.0, 1.0);
-    // strength = step(0.5, strength); // step 大于 0.5 就是 1，小于就是 0
-    // strength = step(0.8, strength);
-
-    // float strength = step(0.8, mod(vUv.y * 10.0, 1.0));
-    // strength += step(0.8, mod(vUv.x * 10.0, 1.0));
-    // strength = clamp(strength, 0.0, 1.0); // 修复线条交点颜色叠加问题
-    // strength -= step(0.8, mod(vUv.x * 10.0, 1.0));
-    // strength *= step(0.8, mod(vUv.x * 10.0, 1.0));
+    // Elevation
+    float elevation = sin(modelPosition.x * uBigWavesFreguency.x + uTime * uBigWavesSpeed) *
+                      sin(modelPosition.z * uBigWavesFreguency.y + uTime * uBigWavesSpeed) *
+                      uBigWavesElevation;
+                      
+    for(float i = 1.0; i <= uSmallWavesIterations; i++){
+    elevation -= abs(cnoise(vec3(modelPosition.xz * uSmallWavesFrequency * i, uTime * uSmallWavesSpeed)) * uSmallWavesElevation / i);
+    }
+    modelPosition.y += elevation;
     
-    // float barX = step(0.4, mod(vUv.x * 10.0, 1.0));
-    // float barY = step(0.4, mod(vUv.y * 10.0, 1.0));
-    // barX *= step(0.8, mod(vUv.y * 10.0, 1.0));
-    // barY *= step(0.8, mod(vUv.x * 10.0, 1.0));
+    vec4 viewPosition = viewMatrix * modelPosition;
+    vec4 projectPosition = projectionMatrix * viewPosition;
 
-    // float barX = step(0.4, mod(vUv.x * 10.0, 1.0));
-    // float barY = step(0.4, mod(vUv.y * 10.0, 1.0));
-    // barX *= step(0.8, mod(vUv.y * 10.0 + 0.2, 1.0));
-    // barY *= step(0.8, mod(vUv.x * 10.0 + 0.2, 1.0));
-    // float strength = barX + barY;
+    gl_Position = projectPosition;
 
-    // float strength = abs(vUv.x - 0.5); // abs 绝对值
-
-    // float strength = min(abs(vUv.x - 0.5), abs(vUv.y - 0.5));
-    // float strength = max(abs(vUv.x - 0.5), abs(vUv.y - 0.5));
-
-    // float strength = step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
-
-    // float square1 = step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
-    // float square2 = 1.0 - step(0.25, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
-    // float strength = square1 * square2;
-
-    // float strength = floor(vUv.x * 10.0) / 10.0; 
-    // strength *= floor(vUv.y * 10.0) / 10.0; 
-
-    // float strength = random(vUv);
-
-    // vec2 gridUv = vec2(floor(vUv.x * 10.0) / 10.0, floor(vUv.y * 10.0) / 10.0);
-    // float strength = random(gridUv);
-    // vec2 gridUv = vec2(floor(vUv.x * 10.0) / 10.0, floor(vUv.x * 5.0 + vUv.y * 10.0) / 10.0);
-    // float strength = random(gridUv);
-
-    // float strength = length(vUv);
-    // float strength = length(vUv - 0.5);
-    // float strength = 1.0 - length(vUv - 0.5);
-    // float strength = distance(vUv, vec2(0.5, 0.5));
-    // float strength = 0.015 / distance(vUv, vec2(0.5));
-    // float strength = 0.015 / distance(vec2(vUv.x * 0.1 + 0.45, vUv.y * 0.5 + 0.25), vec2(0.5));
-
-    // float lightX = 0.015 / distance(vec2(vUv.x * 0.1 + 0.45, vUv.y * 0.5 + 0.25), vec2(0.5));
-    // float lightY = 0.015 / distance(vec2(vUv.y * 0.1 + 0.45, vUv.x * 0.5 + 0.25), vec2(0.5));
-    // float strength = lightX * lightY;
-
-    // vec2 rotatedUv = rotate(vUv, PI * 0.25, vec2(0.5));
-    // float strength = 0.15 / (distance(vec2(rotatedUv.x, (rotatedUv.y - 0.5) * 5.0 + 0.5), vec2(0.5)));
-    // strength *= 0.15 / (distance(vec2(rotatedUv.y, (rotatedUv.x - 0.5) * 5.0 + 0.5), vec2(0.5)));
-
-    // float strength = step(0.25, distance(vUv, vec2(0.5)));
-    // float strength = abs(distance(vUv, vec2(0.5)) - 0.25);
-    // float strength = step(0.01, abs(distance(vUv, vec2(0.5)) - 0.25));
-    // float strength = 1.0 - step(0.01, abs(distance(vUv, vec2(0.5)) - 0.25));
-    // float strength = 1.0 - step(0.01, abs(distance(vec2(vUv.x, vUv.y + sin(vUv.x * 30.0) * 0.1), vec2(0.5)) - 0.25));
-    // float strength = 1.0 - step(0.01, abs(distance(vec2(vUv.x + sin(vUv.y * 30.0) * 0.1, vUv.y + sin(vUv.x * 30.0) * 0.1), vec2(0.5)) - 0.25));
-    // float strength = 1.0 - step(0.01, abs(distance(vec2(vUv.x + sin(vUv.y * 100.0) * 0.1, vUv.y + sin(vUv.x * 100.0) * 0.1), vec2(0.5)) - 0.25));
-
-    // float angle = atan(vUv.x, vUv.y);
-    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
-    // angle /= PI * 2.0;
-    // angle += 0.5;
-    // angle *= 30.0;
-    // angle = mod(angle, 1.0);
-    // float strength = angle;
-
-    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
-    // angle /= PI * 2.0;
-    // angle += 0.5;
-    // float strength = sin(angle * 100.0);
-
-    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
-    // angle /= PI * 2.0;
-    // angle += 0.5;
-    // float sinusoid = sin(angle * 100.0);
-    // float radius = 0.25 + sinusoid * 0.02;
-    // float strength = 1.0 - step(0.01, abs(distance(vUv, vec2(0.5)) - radius));
-
-    // float strength = cnoise(vUv * 10.0);
-    // float strength = step(0.0, cnoise(vUv * 10.0));
-    // float strength = 1.0 - abs(cnoise(vUv * 10.0));
-    // float strength = sin(cnoise(vUv * 10.0) * 20.0);
-    float strength = step(0.9, sin(cnoise(vUv * 10.0) * 20.0));
-
-    // Colored version
-    vec3 blackColor = vec3(0.0);
-    vec3 uvColor = vec3(vUv, 0.5);
-    vec3 mixedColor = mix(blackColor, uvColor, strength);
-    gl_FragColor = vec4(mixedColor, 1.0);
-
-    // gl_FragColor = vec4(strength, strength, strength, 1.0);
+    // Varrings
+    vElevation = elevation;
   }
   `,
-  side: THREE.DoubleSide,
+
+  fragmentShader: `
+  uniform vec3 uSurfaceColor;
+  uniform vec3 uDepthColor;
+  uniform float uColorOffset;
+  uniform float uColorMultiplier;
+
+  varying float vElevation;
+
+  void main(){
+    float mixStrength = (vElevation + uColorOffset) * uColorMultiplier;
+    vec3 color = mix(uDepthColor, uSurfaceColor, mixStrength);
+    gl_FragColor = vec4(color, 1.0);
+  }
+  `,
+
+  uniforms: {
+    uTime: { value: 0 },
+
+    uBigWavesElevation: { value: 0.2 },
+    uBigWavesFreguency: { value: new THREE.Vector2(4, 1.5) },
+    uBigWavesSpeed: { value: 0.75 },
+
+    uSmallWavesElevation: { value: 0.15 },
+    uSmallWavesFrequency: { value: 2 },
+    uSmallWavesSpeed: { value: 0.2 },
+    uSmallWavesIterations: { value: 4 },
+
+    uSurfaceColor: { value: new THREE.Color(debugObject.surfaceColor) },
+    uDepthColor: { value: new THREE.Color(debugObject.depthColor) },
+    uColorOffset: { value: 0.08 },
+    uColorMultiplier: { value: 5 },
+  },
+
+  wireframe: true,
 });
 
+// Debug
+gui
+  .add(waterMaterial.uniforms.uBigWavesElevation, "value")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .name("uBigWavesElevation");
+gui
+  .add(waterMaterial.uniforms.uBigWavesFreguency.value, "x")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uBigWavesFreguencyX");
+gui
+  .add(waterMaterial.uniforms.uBigWavesFreguency.value, "y")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uBigWavesFreguencyY");
+gui
+  .add(waterMaterial.uniforms.uBigWavesSpeed, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uBigWavesSpeed");
+gui
+  .addColor(debugObject, "surfaceColor")
+  .name("surfaceColor")
+  .onChange(() => {
+    waterMaterial.uniforms.uDepthColor.value.set(debugObject.surfaceColor);
+  });
+gui
+  .addColor(debugObject, "depthColor")
+  .name("depthColor")
+  .onChange(() => {
+    waterMaterial.uniforms.uDepthColor.value.set(debugObject.depthColor);
+  });
+gui
+  .add(waterMaterial.uniforms.uColorOffset, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uColorOffset");
+gui
+  .add(waterMaterial.uniforms.uColorMultiplier, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uColorMultiplier");
+gui
+  .add(waterMaterial.uniforms.uSmallWavesElevation, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uSmallWavesElevation");
+gui
+  .add(waterMaterial.uniforms.uSmallWavesFrequency, "value")
+  .min(0)
+  .max(30)
+  .step(0.01)
+  .name("uSmallWavesFrequency");
+gui
+  .add(waterMaterial.uniforms.uSmallWavesIterations, "value")
+  .min(0)
+  .max(6)
+  .step(1)
+  .name("uSmallWavesIterations");
+gui
+  .add(waterMaterial.uniforms.uSmallWavesSpeed, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uSmallWavesSpeed");
+
 // Mesh
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+const water = new THREE.Mesh(waterGeometry, waterMaterial);
+water.rotation.x = -Math.PI * 0.5;
+scene.add(water);
 
 /**
  * Sizes
@@ -237,7 +295,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.set(0.25, -0.25, 1);
+camera.position.set(1, 1, 1);
 scene.add(camera);
 
 // Controls
@@ -256,7 +314,14 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /**
  * Animate
  */
+const clock = new THREE.Clock();
+
 const tick = () => {
+  const elapsedTime = clock.getElapsedTime();
+
+  // Update water wave
+  waterMaterial.uniforms.uTime.value = elapsedTime;
+
   // Update controls
   controls.update();
 
