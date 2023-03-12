@@ -5,8 +5,7 @@ import { OrbitControls } from "./OrbitControls.js";
  * Base
  */
 // Debug
-const gui = new dat.GUI({ width: 340 });
-const debugObject = {};
+const gui = new dat.GUI();
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -15,253 +14,161 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 /**
- * Water
+ * Galaxy
  */
-// Geometry
-// const waterGeometry = new THREE.PlaneGeometry(2, 2, 256, 256);
-const waterGeometry = new THREE.TorusGeometry(0.3, 0.2, 90, 90);
+const parameters = {};
+parameters.count = 200000;
+parameters.size = 0.005;
+parameters.radius = 5;
+parameters.branches = 3;
+parameters.spin = 1;
+parameters.randomness = 0.5;
+parameters.randomnessPower = 3;
+parameters.insideColor = "#ff6030";
+parameters.outsideColor = "#1b3984";
 
-// Color
-debugObject.depthColor = "#186691";
-debugObject.surfaceColor = "#9bd8ff";
+let geometry = null;
+let material = null;
+let points = null;
 
-// Material
-const waterMaterial = new THREE.ShaderMaterial({
-  vertexShader: `
-  uniform float uTime;
-  uniform float uBigWavesElevation;
-  uniform vec2 uBigWavesFreguency;
-  uniform float uBigWavesSpeed;
-
-  uniform float uSmallWavesElevation;
-  uniform float uSmallWavesFrequency;
-  uniform float uSmallWavesSpeed;
-  uniform float uSmallWavesIterations;
-
-  varying float vElevation;
-
-  // Classic Perlin 3D Noise 
-  // by Stefan Gustavson
-  //
-  vec4 permute(vec4 x)
-  {
-      return mod(((x*34.0)+1.0)*x, 289.0);
-  }
-  vec4 taylorInvSqrt(vec4 r)
-  {
-      return 1.79284291400159 - 0.85373472095314 * r;
-  }
-  vec3 fade(vec3 t)
-  {
-      return t*t*t*(t*(t*6.0-15.0)+10.0);
+const generateGalaxy = () => {
+  if (points !== null) {
+    geometry.dispose();
+    material.dispose();
+    scene.remove(points);
   }
 
-  float cnoise(vec3 P)
-  {
-      vec3 Pi0 = floor(P); // Integer part for indexing
-      vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
-      Pi0 = mod(Pi0, 289.0);
-      Pi1 = mod(Pi1, 289.0);
-      vec3 Pf0 = fract(P); // Fractional part for interpolation
-      vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-      vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-      vec4 iy = vec4(Pi0.yy, Pi1.yy);
-      vec4 iz0 = Pi0.zzzz;
-      vec4 iz1 = Pi1.zzzz;
+  /**
+   * Geometry
+   */
+  geometry = new THREE.BufferGeometry();
 
-      vec4 ixy = permute(permute(ix) + iy);
-      vec4 ixy0 = permute(ixy + iz0);
-      vec4 ixy1 = permute(ixy + iz1);
+  const positions = new Float32Array(parameters.count * 3);
+  const colors = new Float32Array(parameters.count * 3);
+  const scales = new Float32Array(parameters.count * 1);
 
-      vec4 gx0 = ixy0 / 7.0;
-      vec4 gy0 = fract(floor(gx0) / 7.0) - 0.5;
-      gx0 = fract(gx0);
-      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-      vec4 sz0 = step(gz0, vec4(0.0));
-      gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-      gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+  const insideColor = new THREE.Color(parameters.insideColor);
+  const outsideColor = new THREE.Color(parameters.outsideColor);
 
-      vec4 gx1 = ixy1 / 7.0;
-      vec4 gy1 = fract(floor(gx1) / 7.0) - 0.5;
-      gx1 = fract(gx1);
-      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-      vec4 sz1 = step(gz1, vec4(0.0));
-      gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-      gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+  for (let i = 0; i < parameters.count; i++) {
+    const i3 = i * 3;
 
-      vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-      vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-      vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-      vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-      vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-      vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-      vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-      vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+    // Position
+    const radius = Math.random() * parameters.radius;
 
-      vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-      g000 *= norm0.x;
-      g010 *= norm0.y;
-      g100 *= norm0.z;
-      g110 *= norm0.w;
-      vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-      g001 *= norm1.x;
-      g011 *= norm1.y;
-      g101 *= norm1.z;
-      g111 *= norm1.w;
+    const branchAngle =
+      ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
 
-      float n000 = dot(g000, Pf0);
-      float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-      float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-      float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-      float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-      float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-      float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-      float n111 = dot(g111, Pf1);
+    const randomX =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1) *
+      parameters.randomness *
+      radius;
+    const randomY =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1) *
+      parameters.randomness *
+      radius;
+    const randomZ =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1) *
+      parameters.randomness *
+      radius;
 
-      vec3 fade_xyz = fade(Pf0);
-      vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-      vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-      float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-      return 2.2 * n_xyz;
+    positions[i3] = Math.cos(branchAngle) * radius + randomX;
+    positions[i3 + 1] = randomY;
+    positions[i3 + 2] = Math.sin(branchAngle) * radius + randomZ;
+
+    // Color
+    const mixedColor = insideColor.clone();
+    mixedColor.lerp(outsideColor, radius / parameters.radius);
+
+    colors[i3] = mixedColor.r;
+    colors[i3 + 1] = mixedColor.g;
+    colors[i3 + 2] = mixedColor.b;
+
+    // Scale
+    scales[i] = Math.random();
   }
 
-  void main(){
-    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
 
-    // Elevation
-    float elevation = sin(modelPosition.x * uBigWavesFreguency.x + uTime * uBigWavesSpeed) *
-                      sin(modelPosition.z * uBigWavesFreguency.y + uTime * uBigWavesSpeed) *
-                      uBigWavesElevation;
-                      
-    for(float i = 1.0; i <= uSmallWavesIterations; i++){
-    elevation -= abs(cnoise(vec3(modelPosition.xz * uSmallWavesFrequency * i, uTime * uSmallWavesSpeed)) * uSmallWavesElevation / i);
+  /**
+   * Material
+   */
+  material = new THREE.ShaderMaterial({
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+
+    vertexShader: `
+    uniform float uSize;
+
+    attribute float aScale;
+
+    void main(){
+      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      vec4 viewPosition = viewMatrix * modelPosition;
+      vec4 projectedPosition = projectionMatrix * viewPosition;
+
+      gl_Position = projectedPosition;
+
+      gl_PointSize =  uSize * aScale;
     }
-    modelPosition.y += elevation;
-    
-    vec4 viewPosition = viewMatrix * modelPosition;
-    vec4 projectPosition = projectionMatrix * viewPosition;
+    `,
 
-    gl_Position = projectPosition;
+    fragmentShader: `
+    void main(){
+      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    `,
 
-    // Varrings
-    vElevation = elevation;
-  }
-  `,
-
-  fragmentShader: `
-  uniform vec3 uSurfaceColor;
-  uniform vec3 uDepthColor;
-  uniform float uColorOffset;
-  uniform float uColorMultiplier;
-
-  varying float vElevation;
-
-  void main(){
-    float mixStrength = (vElevation + uColorOffset) * uColorMultiplier;
-    vec3 color = mix(uDepthColor, uSurfaceColor, mixStrength);
-    gl_FragColor = vec4(color, 1.0);
-  }
-  `,
-
-  uniforms: {
-    uTime: { value: 0 },
-
-    uBigWavesElevation: { value: 0.2 },
-    uBigWavesFreguency: { value: new THREE.Vector2(4, 1.5) },
-    uBigWavesSpeed: { value: 0.75 },
-
-    uSmallWavesElevation: { value: 0.15 },
-    uSmallWavesFrequency: { value: 2 },
-    uSmallWavesSpeed: { value: 0.2 },
-    uSmallWavesIterations: { value: 4 },
-
-    uSurfaceColor: { value: new THREE.Color(debugObject.surfaceColor) },
-    uDepthColor: { value: new THREE.Color(debugObject.depthColor) },
-    uColorOffset: { value: 0.08 },
-    uColorMultiplier: { value: 5 },
-  },
-
-  wireframe: true,
-});
-
-// Debug
-gui
-  .add(waterMaterial.uniforms.uBigWavesElevation, "value")
-  .min(0)
-  .max(1)
-  .step(0.01)
-  .name("uBigWavesElevation");
-gui
-  .add(waterMaterial.uniforms.uBigWavesFreguency.value, "x")
-  .min(0)
-  .max(10)
-  .step(0.01)
-  .name("uBigWavesFreguencyX");
-gui
-  .add(waterMaterial.uniforms.uBigWavesFreguency.value, "y")
-  .min(0)
-  .max(10)
-  .step(0.01)
-  .name("uBigWavesFreguencyY");
-gui
-  .add(waterMaterial.uniforms.uBigWavesSpeed, "value")
-  .min(0)
-  .max(10)
-  .step(0.01)
-  .name("uBigWavesSpeed");
-gui
-  .addColor(debugObject, "surfaceColor")
-  .name("surfaceColor")
-  .onChange(() => {
-    waterMaterial.uniforms.uDepthColor.value.set(debugObject.surfaceColor);
+    uniforms: {
+      uSize: { value: 8 * renderer.getPixelRatio() },
+    },
   });
+
+  /**
+   * Points
+   */
+  points = new THREE.Points(geometry, material);
+  scene.add(points);
+};
+
 gui
-  .addColor(debugObject, "depthColor")
-  .name("depthColor")
-  .onChange(() => {
-    waterMaterial.uniforms.uDepthColor.value.set(debugObject.depthColor);
-  });
+  .add(parameters, "count")
+  .min(100)
+  .max(1000000)
+  .step(100)
+  .onFinishChange(generateGalaxy);
 gui
-  .add(waterMaterial.uniforms.uColorOffset, "value")
-  .min(0)
-  .max(10)
+  .add(parameters, "radius")
+  .min(0.01)
+  .max(20)
   .step(0.01)
-  .name("uColorOffset");
+  .onFinishChange(generateGalaxy);
 gui
-  .add(waterMaterial.uniforms.uColorMultiplier, "value")
-  .min(0)
-  .max(10)
-  .step(0.01)
-  .name("uColorMultiplier");
-gui
-  .add(waterMaterial.uniforms.uSmallWavesElevation, "value")
-  .min(0)
-  .max(10)
-  .step(0.01)
-  .name("uSmallWavesElevation");
-gui
-  .add(waterMaterial.uniforms.uSmallWavesFrequency, "value")
-  .min(0)
-  .max(30)
-  .step(0.01)
-  .name("uSmallWavesFrequency");
-gui
-  .add(waterMaterial.uniforms.uSmallWavesIterations, "value")
-  .min(0)
-  .max(6)
+  .add(parameters, "branches")
+  .min(2)
+  .max(20)
   .step(1)
-  .name("uSmallWavesIterations");
+  .onFinishChange(generateGalaxy);
 gui
-  .add(waterMaterial.uniforms.uSmallWavesSpeed, "value")
+  .add(parameters, "randomness")
   .min(0)
+  .max(2)
+  .step(0.001)
+  .onFinishChange(generateGalaxy);
+gui
+  .add(parameters, "randomnessPower")
+  .min(1)
   .max(10)
-  .step(0.01)
-  .name("uSmallWavesSpeed");
-
-// Mesh
-const water = new THREE.Mesh(waterGeometry, waterMaterial);
-water.rotation.x = -Math.PI * 0.5;
-scene.add(water);
+  .step(0.001)
+  .onFinishChange(generateGalaxy);
+gui.addColor(parameters, "insideColor").onFinishChange(generateGalaxy);
+gui.addColor(parameters, "outsideColor").onFinishChange(generateGalaxy);
 
 /**
  * Sizes
@@ -295,7 +202,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.set(1, 1, 1);
+camera.position.x = 3;
+camera.position.y = 3;
+camera.position.z = 3;
 scene.add(camera);
 
 // Controls
@@ -311,6 +220,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+generateGalaxy();
+
 /**
  * Animate
  */
@@ -318,9 +229,6 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
-
-  // Update water wave
-  waterMaterial.uniforms.uTime.value = elapsedTime;
 
   // Update controls
   controls.update();
