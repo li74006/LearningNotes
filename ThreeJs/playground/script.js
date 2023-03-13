@@ -1,5 +1,13 @@
 import * as THREE from "./three.module.js";
 import { OrbitControls } from "./OrbitControls.js";
+import { GLTFLoader } from "./GLTFLoader.js";
+import { EffectComposer } from "./EffectComposer.js";
+import { RenderPass } from "./RenderPass.js";
+import { DotScreenPass } from "./DotScreenPass.js";
+import { GlitchPass } from "./GlitchPass.js";
+import { ShaderPass } from "./ShaderPass.js";
+import { RGBShiftShader } from "./RGBShiftShader.js";
+import { GammaCorrectionShader } from "./GammaCorrectionShader.js";
 
 /**
  * Base
@@ -14,211 +22,69 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 /**
- * Galaxy
+ * Loaders
  */
-const parameters = {};
-parameters.count = 200000;
-parameters.size = 0.005;
-parameters.radius = 5;
-parameters.branches = 3;
-parameters.spin = 1;
-parameters.randomness = 0.5;
-parameters.randomnessPower = 3;
-parameters.insideColor = "#ff6030";
-parameters.outsideColor = "#1b3984";
+const gltfLoader = new GLTFLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+const textureLoader = new THREE.TextureLoader();
 
-let geometry = null;
-let material = null;
-let points = null;
-
-const generateGalaxy = () => {
-  if (points !== null) {
-    geometry.dispose();
-    material.dispose();
-    scene.remove(points);
-  }
-
-  /**
-   * Geometry
-   */
-  geometry = new THREE.BufferGeometry();
-
-  const positions = new Float32Array(parameters.count * 3);
-  const colors = new Float32Array(parameters.count * 3);
-  const scales = new Float32Array(parameters.count * 1);
-  const randomness = new Float32Array(parameters.count * 3);
-
-  const insideColor = new THREE.Color(parameters.insideColor);
-  const outsideColor = new THREE.Color(parameters.outsideColor);
-
-  for (let i = 0; i < parameters.count; i++) {
-    const i3 = i * 3;
-
-    // Position
-    const radius = Math.random() * parameters.radius;
-
-    const branchAngle =
-      ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
-
-    const randomX =
-      Math.pow(Math.random(), parameters.randomnessPower) *
-      (Math.random() < 0.5 ? 1 : -1) *
-      parameters.randomness *
-      radius;
-    const randomY =
-      Math.pow(Math.random(), parameters.randomnessPower) *
-      (Math.random() < 0.5 ? 1 : -1) *
-      parameters.randomness *
-      radius;
-    const randomZ =
-      Math.pow(Math.random(), parameters.randomnessPower) *
-      (Math.random() < 0.5 ? 1 : -1) *
-      parameters.randomness *
-      radius;
-
-    // positions[i3] = Math.cos(branchAngle) * radius + randomX;
-    // positions[i3 + 1] = randomY;
-    // positions[i3 + 2] = Math.sin(branchAngle) * radius + randomZ;
-
-    positions[i3] = Math.cos(branchAngle) * radius;
-    positions[i3 + 1] = 0;
-    positions[i3 + 2] = Math.sin(branchAngle) * radius;
-
-    randomness[i3 + 1] = randomX;
-    randomness[i3 + 2] = randomY;
-    randomness[i3 + 3] = randomZ;
-
-    // Color
-    const mixedColor = insideColor.clone();
-    mixedColor.lerp(outsideColor, radius / parameters.radius);
-
-    colors[i3] = mixedColor.r;
-    colors[i3 + 1] = mixedColor.g;
-    colors[i3 + 2] = mixedColor.b;
-
-    // Scale
-    scales[i] = Math.random();
-  }
-
-  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
-  geometry.setAttribute(
-    "aRandomness",
-    new THREE.BufferAttribute(randomness, 3)
-  );
-
-  /**
-   * Material
-   */
-  material = new THREE.ShaderMaterial({
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true,
-
-    vertexShader: `
-    uniform float uTime;
-    uniform float uSize;
-
-    attribute float aScale;
-    attribute vec3 aRandomness;
-
-    varying vec3 vColor;
-
-    void main(){
-      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-      
-      float angle = atan(modelPosition.x, modelPosition.z);
-      float distanceToCenter = length(modelPosition.xz);
-      float angleOffset = (1.0 / distanceToCenter) * uTime * 0.2;
-      angle += angleOffset;
-      modelPosition.x = cos(angle) * distanceToCenter;
-      modelPosition.z = sin(angle) * distanceToCenter;
-
-      modelPosition.xyz += aRandomness;
-
-      vec4 viewPosition = viewMatrix * modelPosition;
-      vec4 projectedPosition = projectionMatrix * viewPosition;
-
-      gl_Position = projectedPosition;
-
-      // Size
-      gl_PointSize =  uSize * aScale;
-      gl_PointSize *= (1.0 / - viewPosition.z);
-
-      vColor = color;
+/**
+ * Update all materials
+ */
+const updateAllMaterials = () => {
+  scene.traverse((child) => {
+    if (
+      child instanceof THREE.Mesh &&
+      child.material instanceof THREE.MeshStandardMaterial
+    ) {
+      child.material.envMapIntensity = 2.5;
+      child.material.needsUpdate = true;
+      child.castShadow = true;
+      child.receiveShadow = true;
     }
-    `,
-
-    fragmentShader: `
-    varying vec3 vColor;
-
-    void main(){
-      // float strength = distance(gl_PointCoord, vec2(0.5));
-      // strength = step(0.5, strength);
-      // strength = 1.0 -strength;
-
-      // float strength = distance(gl_PointCoord, vec2(0.5));
-      // strength *= 2.0;
-      // strength = 1.0 - strength;
-
-      float strength = distance(gl_PointCoord, vec2(0.5));
-      strength = 1.0 - strength;
-      strength = pow(strength, 10.0);
-
-      vec3 color = mix(vec3(0.0), vColor, strength);
-
-      gl_FragColor = vec4(color, 1.0);
-
-
-    }
-    `,
-
-    uniforms: {
-      uTime: { value: 0 },
-      uSize: { value: 30 * renderer.getPixelRatio() },
-    },
   });
-
-  /**
-   * Points
-   */
-  points = new THREE.Points(geometry, material);
-  scene.add(points);
 };
 
-gui
-  .add(parameters, "count")
-  .min(100)
-  .max(1000000)
-  .step(100)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "radius")
-  .min(0.01)
-  .max(20)
-  .step(0.01)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "branches")
-  .min(2)
-  .max(20)
-  .step(1)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "randomness")
-  .min(0)
-  .max(2)
-  .step(0.001)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "randomnessPower")
-  .min(1)
-  .max(10)
-  .step(0.001)
-  .onFinishChange(generateGalaxy);
-gui.addColor(parameters, "insideColor").onFinishChange(generateGalaxy);
-gui.addColor(parameters, "outsideColor").onFinishChange(generateGalaxy);
+/**
+ * Environment map
+ */
+const environmentMap = cubeTextureLoader.load([
+  "./public/textures/environmentMaps/0/px.jpg",
+  "./public/textures/environmentMaps/0/nx.jpg",
+  "./public/textures/environmentMaps/0/py.jpg",
+  "./public/textures/environmentMaps/0/ny.jpg",
+  "./public/textures/environmentMaps/0/pz.jpg",
+  "./public/textures/environmentMaps/0/nz.jpg",
+]);
+environmentMap.encoding = THREE.sRGBEncoding;
+
+scene.background = environmentMap;
+scene.environment = environmentMap;
+
+/**
+ * Models
+ */
+gltfLoader.load(
+  "./public/models/DamagedHelmet/glTF/DamagedHelmet.gltf",
+  (gltf) => {
+    gltf.scene.scale.set(2, 2, 2);
+    gltf.scene.rotation.y = Math.PI * 0.5;
+    scene.add(gltf.scene);
+
+    updateAllMaterials();
+  }
+);
+
+/**
+ * Lights
+ */
+const directionalLight = new THREE.DirectionalLight("#ffffff", 3);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.camera.far = 15;
+directionalLight.shadow.normalBias = 0.05;
+directionalLight.position.set(0.25, 3, -2.25);
+scene.add(directionalLight);
 
 /**
  * Sizes
@@ -240,6 +106,10 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Update effect composer
+  effectComposer.setSize(sizes.width, sizes.height);
+  effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
 /**
@@ -252,9 +122,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.x = 3;
-camera.position.y = 3;
-camera.position.z = 3;
+camera.position.set(4, 1, -4);
 scene.add(camera);
 
 // Controls
@@ -266,11 +134,51 @@ controls.enableDamping = true;
  */
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  antialias: true,
 });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMappingExposure = 1.5;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-generateGalaxy();
+/**
+ * Post processing
+ */
+// Render target
+const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
+  minFilter: THREE.LinearFilter,
+  magFilter: THREE.LinearFilter,
+  format: THREE.RGBAFormat,
+  encoding: THREE.sRGBEncoding,
+});
+
+// Composer
+const effectComposer = new EffectComposer(renderer, renderTarget);
+effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+effectComposer.setSize(sizes.width, sizes.height);
+
+// Passes
+const renderPass = new RenderPass(scene, camera);
+effectComposer.addPass(renderPass);
+
+const gammaCorrection = new ShaderPass(GammaCorrectionShader); // 需要先加 gamma 校正，否则 sRGB Encoding 无效，https://github.com/mrdoob/three.js/issues/24843
+effectComposer.addPass(gammaCorrection);
+
+const dotScreenPass = new DotScreenPass();
+dotScreenPass.enabled = true;
+effectComposer.addPass(dotScreenPass);
+
+const glitchPass = new GlitchPass();
+glitchPass.enabled = false;
+effectComposer.addPass(glitchPass);
+
+const rgbShiftShader = new ShaderPass(RGBShiftShader);
+rgbShiftShader.enabled = true;
+effectComposer.addPass(rgbShiftShader);
 
 /**
  * Animate
@@ -280,14 +188,14 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Updater material
-  material.uniforms.uTime.value = elapsedTime;
-
   // Update controls
   controls.update();
 
   // Render
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
+
+  // Update EffectComposer
+  effectComposer.render();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
