@@ -8,6 +8,7 @@ import { GlitchPass } from "./GlitchPass.js";
 import { ShaderPass } from "./ShaderPass.js";
 import { RGBShiftShader } from "./RGBShiftShader.js";
 import { GammaCorrectionShader } from "./GammaCorrectionShader.js";
+import { SMAAPass } from "./SMAAPass.js";
 
 /**
  * Base
@@ -145,11 +146,15 @@ renderer.toneMappingExposure = 1.5;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+console.log(renderer.capabilities);
+
 /**
  * Post processing
  */
 // Render target
 const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
+  // const renderTarget = new THREE.WebGLMultisampleRenderTarget(800, 600, {
+  // 使用 WebGlMultisampleRenderTarget 确保使用 composer pass 后能够抗锯齿，但现在它已经被移除了··· WebGLMultisampleRenderTarget has been removed. To use multisampling as before, use WebGLRenderTarget and set the new samples property to a value greater 0.
   minFilter: THREE.LinearFilter,
   magFilter: THREE.LinearFilter,
   format: THREE.RGBAFormat,
