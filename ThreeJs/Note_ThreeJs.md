@@ -4341,3 +4341,9 @@ bookmark : 2023-03-14 P32 听完。
 ### P33 : Performance Tips
 
 Draw calls : A draw call represents a single draw from a texture to the display. Ideally, we want to have the least amount of draw calls possible. Now as you get started and add game objects to the scene that render individual sprites, each one of these is going to take up a single draw call.
+
+bookmark : 2023-03-15 P33 听完。
+
+### P34 : Intro and Loading Progress
+
+bookmark : 2023-03-15 P34 听到 21min。
