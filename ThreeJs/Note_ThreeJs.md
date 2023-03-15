@@ -677,12 +677,8 @@ const normalTexture = textureLoader.load("./public/textures/door/normal.jpg");
 const ambientOcclusionTexture = textureLoader.load(
   "./public/textures/door/ambientOcclusion.jpg"
 );
-const metalnessTexture = textureLoader.load(
-  "./public/textures/door/metalness.jpg"
-);
-const roughnessTexture = textureLoader.load(
-  "./public/textures/door/roughness.jpg"
-);
+const metalnessTexture = textureLoader.load("./public/textures/door/metalness.jpg");
+const roughnessTexture = textureLoader.load("./public/textures/door/roughness.jpg");
 
 // create scene
 const scene = new THREE.Scene();
@@ -788,21 +784,13 @@ const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 const doorColorTexture = textureLoader.load("./public/textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./public/textures/door/alpha.jpg");
-const doorNormalTexture = textureLoader.load(
-  "./public/textures/door/normal.jpg"
-);
+const doorNormalTexture = textureLoader.load("./public/textures/door/normal.jpg");
 const doorAmbientOcclusionTexture = textureLoader.load(
   "./public/textures/door/ambientOcclusion.jpg"
 );
-const doorHeightTexture = textureLoader.load(
-  "./public/textures/door/height.jpg"
-);
-const doorMetalnessTexture = textureLoader.load(
-  "./public/textures/door/metalness.jpg"
-);
-const doorRoughnessTexture = textureLoader.load(
-  "./public/textures/door/roughness.jpg"
-);
+const doorHeightTexture = textureLoader.load("./public/textures/door/height.jpg");
+const doorMetalnessTexture = textureLoader.load("./public/textures/door/metalness.jpg");
+const doorRoughnessTexture = textureLoader.load("./public/textures/door/roughness.jpg");
 const matcapTexture = textureLoader.load("./public/textures/matcaps/3.png");
 const gradientTexture = textureLoader.load("./public/textures/gradients/5.jpg");
 gradientTexture.minFilter = THREE.NearestFilter;
@@ -1191,10 +1179,7 @@ const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material); 
 sphere.position.x = -1.5;
 
 const plane = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), material); // THREE.PlaneBufferGeometry has been renamed to THREE.PlaneGeometry.
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(6, 6, 100, 100),
-  material
-);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(6, 6, 100, 100), material);
 ground.rotation.x = Math.PI * -0.5;
 ground.position.y = -1.5;
 
@@ -1228,24 +1213,14 @@ rectAreaLight.position.set(-1.5, 0, 1.5);
 rectAreaLight.lookAt(new THREE.Vector3());
 scene.add(rectAreaLight);
 
-const spotLight = new THREE.SpotLight(
-  0x78ff00,
-  0.5,
-  10,
-  Math.PI * 0.1,
-  0.25,
-  1
-);
+const spotLight = new THREE.SpotLight(0x78ff00, 0.5, 10, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
 scene.add(spotLight);
 spotLight.target.position.x = -0.75;
 scene.add(spotLight.target);
 
 // light helper
-const hemisphereLightHelper = new THREE.HemisphereLightHelper(
-  hemisphereLight,
-  0.1
-);
+const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 0.1);
 scene.add(hemisphereLightHelper);
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
@@ -1334,9 +1309,7 @@ import { OrbitControls } from "./OrbitControls.js";
  * Textures
  */
 const textureLoader = new THREE.TextureLoader();
-const bakedShadow = textureLoader.load(
-  "./public/textures/shadows/bakedShadow.jpg"
-);
+const bakedShadow = textureLoader.load("./public/textures/shadows/bakedShadow.jpg");
 
 /**
  * Base
@@ -1465,12 +1438,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 2;
@@ -1560,10 +1528,7 @@ for (let i = 0; i < count * 3; i++) {
   colors[i] = Math.random();
 }
 
-particlesGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions, 3)
-);
+particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
 const cube = new THREE.Mesh(
@@ -1616,12 +1581,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.z = 3;
 scene.add(camera);
 
@@ -1740,8 +1700,7 @@ const generateGalaxy = () => {
     const radius = Math.random() * parameters.radius;
 
     const spinAngle = radius * parameters.spin;
-    const branchAngle =
-      ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+    const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
 
     const randomX =
       Math.pow(Math.random(), parameters.randomnessPower) *
@@ -1807,30 +1766,10 @@ gui
   .max(0.1)
   .step(0.001)
   .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "radius")
-  .min(0.01)
-  .max(20)
-  .step(0.01)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "branches")
-  .min(1)
-  .max(30)
-  .step(1)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "spin")
-  .min(-5)
-  .max(5)
-  .step(0.05)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "randomness")
-  .min(0)
-  .max(2)
-  .step(0.01)
-  .onFinishChange(generateGalaxy);
+gui.add(parameters, "radius").min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy);
+gui.add(parameters, "branches").min(1).max(30).step(1).onFinishChange(generateGalaxy);
+gui.add(parameters, "spin").min(-5).max(5).step(0.05).onFinishChange(generateGalaxy);
+gui.add(parameters, "randomness").min(0).max(2).step(0.01).onFinishChange(generateGalaxy);
 gui
   .add(parameters, "randomnessPower")
   .min(0)
@@ -1868,12 +1807,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.x = 3;
 camera.position.y = 3;
 camera.position.z = 3;
@@ -2009,12 +1943,7 @@ window.addEventListener("click", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.z = 3;
 scene.add(camera);
 
@@ -2137,10 +2066,7 @@ const objectsDistance = 4;
 
 const mesh1 = new THREE.Mesh(new THREE.TorusGeometry(1, 0.4, 16, 60), material);
 const mesh2 = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 32), material);
-const mesh3 = new THREE.Mesh(
-  new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16),
-  material
-);
+const mesh3 = new THREE.Mesh(new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16), material);
 
 mesh2.position.y = -objectsDistance * 1;
 mesh3.position.y = -objectsDistance * 2;
@@ -2159,16 +2085,12 @@ const positions = new Float32Array(particlesCount * 3);
 for (let i = 0; i < particlesCount; i++) {
   positions[i * 3] = (Math.random() - 0.5) * 10;
   positions[i * 3 + 1] =
-    objectsDistance * 0.5 -
-    Math.random() * objectsDistance * sectionMeshs.length;
+    objectsDistance * 0.5 - Math.random() * objectsDistance * sectionMeshs.length;
   positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
 }
 
 const particlesGeometry = new THREE.BufferGeometry();
-particlesGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions, 3)
-);
+particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
 const particlesMaterial = new THREE.PointsMaterial({
   color: parameters.color,
@@ -2254,12 +2176,7 @@ window.addEventListener("mousemove", (e) => {
 const cameraGroup = new THREE.Group();
 scene.add(cameraGroup);
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  35,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100);
 camera.position.z = 6;
 cameraGroup.add(camera);
 
@@ -2468,12 +2385,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(-3, 3, 3);
 scene.add(camera);
 
@@ -2600,24 +2512,21 @@ gui
 /**
  * Models
  */
-gltfLoader.load(
-  "./public/models/FlightHelmet/glTF/FlightHelmet.gltf",
-  (gltf) => {
-    gltf.scene.scale.set(10, 10, 10);
-    gltf.scene.position.set(0, -4, 0);
-    gltf.scene.rotation.y = Math.PI * 0.5;
-    scene.add(gltf.scene);
+gltfLoader.load("./public/models/FlightHelmet/glTF/FlightHelmet.gltf", (gltf) => {
+  gltf.scene.scale.set(10, 10, 10);
+  gltf.scene.position.set(0, -4, 0);
+  gltf.scene.rotation.y = Math.PI * 0.5;
+  scene.add(gltf.scene);
 
-    gui
-      .add(gltf.scene.rotation, "y")
-      .min(-Math.PI)
-      .max(Math.PI)
-      .step(0.001)
-      .name("rotation");
+  gui
+    .add(gltf.scene.rotation, "y")
+    .min(-Math.PI)
+    .max(Math.PI)
+    .step(0.001)
+    .name("rotation");
 
-    updateAllMaterials();
-  }
-);
+  updateAllMaterials();
+});
 
 // gltfLoader.load(
 //     '/models/hamburger.glb',
@@ -2642,30 +2551,10 @@ directionalLight.shadow.normalBias = 0.05;
 directionalLight.position.set(0.25, 3, -2.25);
 scene.add(directionalLight);
 
-gui
-  .add(directionalLight, "intensity")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("lightIntensity");
-gui
-  .add(directionalLight.position, "x")
-  .min(-5)
-  .max(5)
-  .step(0.001)
-  .name("lightX");
-gui
-  .add(directionalLight.position, "y")
-  .min(-5)
-  .max(5)
-  .step(0.001)
-  .name("lightY");
-gui
-  .add(directionalLight.position, "z")
-  .min(-5)
-  .max(5)
-  .step(0.001)
-  .name("lightZ");
+gui.add(directionalLight, "intensity").min(0).max(10).step(0.001).name("lightIntensity");
+gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001).name("lightX");
+gui.add(directionalLight.position, "y").min(-5).max(5).step(0.001).name("lightY");
+gui.add(directionalLight.position, "z").min(-5).max(5).step(0.001).name("lightZ");
 
 /**
  * Sizes
@@ -2693,12 +2582,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(4, 1, -4);
 scene.add(camera);
 
@@ -2922,12 +2806,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(0.25, -0.25, 1);
 scene.add(camera);
 
@@ -3208,12 +3087,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(0.25, -0.25, 1);
 scene.add(camera);
 
@@ -3545,12 +3419,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(1, 1, 1);
 scene.add(camera);
 
@@ -3657,8 +3526,7 @@ const generateGalaxy = () => {
     // Position
     const radius = Math.random() * parameters.radius;
 
-    const branchAngle =
-      ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+    const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
 
     const randomX =
       Math.pow(Math.random(), parameters.randomnessPower) *
@@ -3703,10 +3571,7 @@ const generateGalaxy = () => {
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
-  geometry.setAttribute(
-    "aRandomness",
-    new THREE.BufferAttribute(randomness, 3)
-  );
+  geometry.setAttribute("aRandomness", new THREE.BufferAttribute(randomness, 3));
 
   /**
    * Material
@@ -3793,18 +3658,8 @@ gui
   .max(1000000)
   .step(100)
   .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "radius")
-  .min(0.01)
-  .max(20)
-  .step(0.01)
-  .onFinishChange(generateGalaxy);
-gui
-  .add(parameters, "branches")
-  .min(2)
-  .max(20)
-  .step(1)
-  .onFinishChange(generateGalaxy);
+gui.add(parameters, "radius").min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy);
+gui.add(parameters, "branches").min(2).max(20).step(1).onFinishChange(generateGalaxy);
 gui
   .add(parameters, "randomness")
   .min(0)
@@ -3846,12 +3701,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.x = 3;
 camera.position.y = 3;
 camera.position.z = 3;
@@ -3964,14 +3814,10 @@ scene.environment = environmentMap;
  */
 
 // Textures
-const mapTexture = textureLoader.load(
-  "./public/models/LeePerrySmith/color.jpg"
-);
+const mapTexture = textureLoader.load("./public/models/LeePerrySmith/color.jpg");
 mapTexture.encoding = THREE.sRGBEncoding;
 
-const normalTexture = textureLoader.load(
-  "./public/models/LeePerrySmith/normal.jpg"
-);
+const normalTexture = textureLoader.load("./public/models/LeePerrySmith/normal.jpg");
 
 // Material
 const material = new THREE.MeshStandardMaterial({
@@ -4115,12 +3961,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(4, 1, -4);
 scene.add(camera);
 
@@ -4243,16 +4084,13 @@ scene.environment = environmentMap;
 /**
  * Models
  */
-gltfLoader.load(
-  "./public/models/DamagedHelmet/glTF/DamagedHelmet.gltf",
-  (gltf) => {
-    gltf.scene.scale.set(2, 2, 2);
-    gltf.scene.rotation.y = Math.PI * 0.5;
-    scene.add(gltf.scene);
+gltfLoader.load("./public/models/DamagedHelmet/glTF/DamagedHelmet.gltf", (gltf) => {
+  gltf.scene.scale.set(2, 2, 2);
+  gltf.scene.rotation.y = Math.PI * 0.5;
+  scene.add(gltf.scene);
 
-    updateAllMaterials();
-  }
-);
+  updateAllMaterials();
+});
 
 /**
  * Lights
@@ -4295,12 +4133,7 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(4, 1, -4);
 scene.add(camera);
 
@@ -4504,3 +4337,7 @@ tick();
 ```
 
 bookmark : 2023-03-14 P32 听完。
+
+### P33 : Performance Tips
+
+Draw calls : A draw call represents a single draw from a texture to the display. Ideally, we want to have the least amount of draw calls possible. Now as you get started and add game objects to the scene that render individual sprites, each one of these is going to take up a single draw call.
