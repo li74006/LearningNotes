@@ -4347,3 +4347,4 @@ bookmark : 2023-03-15 P33 听完。
 ### P34 : Intro and Loading Progress
 
 bookmark : 2023-03-15 P34 听到 21min。
+bookmark : 2023-03-16 P34 听完。
