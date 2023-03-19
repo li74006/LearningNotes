@@ -1,17 +1,17 @@
 import * as THREE from "./three.module.js";
 import { OrbitControls } from "./OrbitControls.js";
-import Stats from "./stats.module.js";
-import * as BufferGeometryUtils from "./BufferGeometryUtils.js";
+import { GLTFLoader } from "./GLTFLoader.js";
+import { DRACOLoader } from "./DRACOLoader.js";
 
-/**
- * Stats
- */
-const stats = new Stats();
-stats.showPanel(0);
-document.body.appendChild(stats.dom);
 /**
  * Base
  */
+// Debug
+const debugObject = {};
+const gui = new dat.GUI({
+  width: 400,
+});
+
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
 
@@ -19,12 +19,71 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 /**
- * Textures
+ * Loaders
  */
+// Texture loader
 const textureLoader = new THREE.TextureLoader();
-const displacementTexture = textureLoader.load(
-  "./public/textures/displacementMap.png"
-);
+
+// Draco loader
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath("./public/draco/");
+
+// GLTF loader
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+
+/**
+ * Testures
+ */
+const bakedTexture = textureLoader.load("./public/models/Portal/baked.jpg");
+bakedTexture.flipY = false; // 禁用 loader 的 texture 翻转，否则贴图位置不对
+bakedTexture.encoding = THREE.sRGBEncoding; // 使用 sRGB 编码方式，确保结果跟 blender 渲染出的效果一样
+
+/**
+ * Materials
+ */
+
+// Baked Material
+const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
+
+// Lamp material
+const lampMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
+
+// Portal material
+const portalMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+
+/**
+ * Objects
+ */
+gltfLoader.load("./public/models/Portal/Portal.glb", (gltf) => {
+  gltf.scene.traverse((child) => {
+    child.material = bakedMaterial;
+  });
+
+  // 找出 左右灯柱玻璃 和 传送门，为其单独设置发光材质,但是我的 blender 导出的 左右路灯就是 children 的 children，不知道为啥
+  // const lampLeft = gltf.scene.children.find((child) => child.name === "lampLeft");
+  // const lampRight = gltf.scene.children.find((child) => child.name === "lampRight");
+  const portal = gltf.scene.children.find((child) => child.name === "portal");
+
+  portal.material = portalMaterial;
+
+  scene.add(gltf.scene);
+});
+
+// fireflies
+const fireflyGeometry = new THREE.BufferGeometry();
+const fireflyCount = 30;
+const fireflyPositionArray = new Float32Array(fireflyCount * 3);
+for (let i = 0; i < fireflyCount; i++) {
+  fireflyPositionArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
+  fireflyPositionArray[i * 3 + 1] = Math.random() * 1.5;
+  fireflyPositionArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+}
+fireflyGeometry.setAttribute("position", new THREE.BufferAttribute(fireflyPositionArray, 3));
+
+const fireflyMaterial = new THREE.PointsMaterial({ size: 0.1, sizeAttenuation: true });
+const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial);
+scene.add(fireflies);
 
 /**
  * Sizes
@@ -52,13 +111,10 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
-camera.position.set(2, 2, 6);
+const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
+camera.position.x = 4;
+camera.position.y = 2;
+camera.position.z = 4;
 scene.add(camera);
 
 // Controls
@@ -70,63 +126,17 @@ controls.enableDamping = true;
  */
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
-  powerPreference: "high-performance",
   antialias: true,
 });
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding; // 保证渲染器的输出编码方式也是 sRGB
 
-/**
- * Test meshes
- */
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(2, 2, 2),
-  new THREE.MeshStandardMaterial()
-);
-cube.castShadow = true;
-cube.receiveShadow = true;
-cube.position.set(-5, 0, 0);
-scene.add(cube);
-
-const torusKnot = new THREE.Mesh(
-  new THREE.TorusKnotGeometry(1, 0.4, 128, 32),
-  new THREE.MeshStandardMaterial()
-);
-torusKnot.castShadow = true;
-torusKnot.receiveShadow = true;
-scene.add(torusKnot);
-
-const sphere = new THREE.Mesh(
-  new THREE.SphereGeometry(1, 32, 32),
-  new THREE.MeshStandardMaterial()
-);
-sphere.position.set(5, 0, 0);
-sphere.castShadow = true;
-sphere.receiveShadow = true;
-scene.add(sphere);
-
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 10),
-  new THREE.MeshStandardMaterial()
-);
-floor.position.set(0, -2, 0);
-floor.rotation.x = -Math.PI * 0.5;
-floor.castShadow = true;
-floor.receiveShadow = true;
-scene.add(floor);
-
-/**
- * Lights
- */
-const directionalLight = new THREE.DirectionalLight("#ffffff", 1);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(1024, 1024);
-directionalLight.shadow.camera.far = 15;
-directionalLight.shadow.normalBias = 0.05;
-directionalLight.position.set(0.25, 3, 2.25);
-scene.add(directionalLight);
+debugObject.clearColor = "#20357a";
+renderer.setClearColor(debugObject.clearColor);
+gui.addColor(debugObject, "clearColor").onChange(() => {
+  renderer.setClearColor(debugObject.clearColor);
+});
 
 /**
  * Animate
@@ -134,12 +144,9 @@ scene.add(directionalLight);
 const clock = new THREE.Clock();
 
 const tick = () => {
-  stats.begin();
-
   const elapsedTime = clock.getElapsedTime();
 
-  // Update test mesh
-  torusKnot.rotation.y = elapsedTime * 0.1;
+  // Update
 
   // Update controls
   controls.update();
@@ -149,209 +156,6 @@ const tick = () => {
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
-
-  stats.end();
 };
 
 tick();
-
-/**
- * Tips
- */
-
-// // Tip 4
-// console.log(renderer.info)
-
-// // Tip 6
-// scene.remove(cube)
-// cube.geometry.dispose()
-// cube.material.dispose()
-
-// // Tip 10
-// directionalLight.shadow.camera.top = 3
-// directionalLight.shadow.camera.right = 6
-// directionalLight.shadow.camera.left = - 6
-// directionalLight.shadow.camera.bottom = - 3
-// directionalLight.shadow.camera.far = 10
-// directionalLight.shadow.mapSize.set(1024, 1024)
-
-// const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
-// scene.add(cameraHelper)
-
-// // Tip 11
-// cube.castShadow = true
-// cube.receiveShadow = false
-
-// torusKnot.castShadow = true
-// torusKnot.receiveShadow = false
-
-// sphere.castShadow = true
-// sphere.receiveShadow = false
-
-// floor.castShadow = false
-// floor.receiveShadow = true
-
-// // Tip 12
-// renderer.shadowMap.autoUpdate = false // 代价是影子不会随时更新
-// renderer.shadowMap.needsUpdate = true
-
-// // Tip 18
-// for(let i = 0; i < 50; i++)
-// {
-//     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-
-//     const material = new THREE.MeshNormalMaterial()
-
-//     const mesh = new THREE.Mesh(geometry, material)
-//     mesh.position.x = (Math.random() - 0.5) * 10
-//     mesh.position.y = (Math.random() - 0.5) * 10
-//     mesh.position.z = (Math.random() - 0.5) * 10
-//     mesh.rotation.x = (Math.random() - 0.5) * Math.PI * 2
-//     mesh.rotation.y = (Math.random() - 0.5) * Math.PI * 2
-
-//     scene.add(mesh)
-// }
-
-// // Tip 19
-
-// const geometries = [];
-
-// for (let i = 0; i < 50; i++) {
-//   const quaternion = new THREE.Quaternion();
-//   quaternion.setFromEuler(
-//     new THREE.Euler(
-//       (Math.random() - 0.5) * Math.PI * 2,
-//       (Math.random() - 0.5) * Math.PI * 2,
-//       0
-//     )
-//   );
-
-//   const matrix = new THREE.Matrix4();
-//   matrix.makeRotationFromQuaternion(quaternion);
-//   Mesh.setMatrixAt(i, matrix);
-
-//   // const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-
-//   // geometry.rotateX(Math.random() - 0.5) * Math.PI * 2
-//   // geometry.rotateY(Math.random() - 0.5) * Math.PI * 2
-
-//   // geometry.translate(
-//   //   (Math.random() - 0.5) * 10,
-//   //   (Math.random() - 0.5) * 10,
-//   //   (Math.random() - 0.5) * 10
-//   // );
-
-//   // geometries.push(geometry);
-// }
-
-// const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
-// const material = new THREE.MeshNormalMaterial();
-// // const mesh = new THREE.Mesh(mergedGeometry, material);
-// const mesh = new THREE.InstancedMesh(mergedGeometry, material, 50);
-// scene.add(mesh);
-// const material = new THREE.MeshNormalMaterial()
-
-// const mesh = new THREE.Mesh(geometry, material)
-// mesh.position.x = (Math.random() - 0.5) * 10
-// mesh.position.y = (Math.random() - 0.5) * 10
-// mesh.position.z = (Math.random() - 0.5) * 10
-// mesh.rotation.x = (Math.random() - 0.5) * Math.PI * 2
-// mesh.rotation.y = (Math.random() - 0.5) * Math.PI * 2
-
-// // Tip 20
-// const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-
-// for(let i = 0; i < 50; i++)
-// {
-//     const material = new THREE.MeshNormalMaterial()
-
-//     const mesh = new THREE.Mesh(geometry, material)
-//     mesh.position.x = (Math.random() - 0.5) * 10
-//     mesh.position.y = (Math.random() - 0.5) * 10
-//     mesh.position.z = (Math.random() - 0.5) * 10
-//     mesh.rotation.x = (Math.random() - 0.5) * Math.PI * 2
-//     mesh.rotation.y = (Math.random() - 0.5) * Math.PI * 2
-
-//     scene.add(mesh)
-// }
-
-// // Tip 22
-// const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-
-// const material = new THREE.MeshNormalMaterial()
-
-// for(let i = 0; i < 50; i++)
-// {
-//     const mesh = new THREE.Mesh(geometry, material)
-//     mesh.position.x = (Math.random() - 0.5) * 10
-//     mesh.position.y = (Math.random() - 0.5) * 10
-//     mesh.position.z = (Math.random() - 0.5) * 10
-//     mesh.rotation.x = (Math.random() - 0.5) * Math.PI * 2
-//     mesh.rotation.y = (Math.random() - 0.5) * Math.PI * 2
-
-//     scene.add(mesh)
-// }
-
-// // Tip 29
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-// Tip 31, 32, 34 and 35
-const shaderGeometry = new THREE.PlaneGeometry(10, 10, 256, 256)
-
-const shaderMaterial = new THREE.ShaderMaterial({
-    uniforms:
-    {
-        uDisplacementTexture: { value: displacementTexture },
-        uDisplacementStrength: { value: 1.5 }
-    },
-    vertexShader: `
-        uniform sampler2D uDisplacementTexture;
-        uniform float uDisplacementStrength;
-
-        varying vec2 vUv;
-
-        void main()
-        {
-            vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-
-            float elevation = texture2D(uDisplacementTexture, uv).r;
-            if(elevation < 0.5)
-            {
-                elevation = 0.5;
-            }
-
-            modelPosition.y += elevation * uDisplacementStrength ;
-
-            gl_Position = projectionMatrix * viewMatrix * modelPosition;
-
-            vUv = uv;
-        }
-    `,
-    fragmentShader: `
-        uniform sampler2D uDisplacementTexture;
-
-        varying vec2 vUv;
-
-        void main()
-        {
-            float elevation = texture2D(uDisplacementTexture, vUv).r;
-            if(elevation < 0.25)
-            {
-                elevation = 0.25;
-            }
-
-            vec3 depthColor = vec3(1.0, 0.1, 0.1);
-            vec3 surfaceColor = vec3(0.1, 0.0, 0.5);
-            vec3 finalColor = vec3(0.0);
-            finalColor.r += depthColor.r + (surfaceColor.r - depthColor.r) * elevation;
-            finalColor.g += depthColor.g + (surfaceColor.g - depthColor.g) * elevation;
-            finalColor.b += depthColor.b + (surfaceColor.b - depthColor.b) * elevation;
-
-            gl_FragColor = vec4(finalColor, 1.0);
-        }
-    `
-})
-
-const shaderMesh = new THREE.Mesh(shaderGeometry, shaderMaterial)
-shaderMesh.rotation.x = - Math.PI * 0.5
-scene.add(shaderMesh)
