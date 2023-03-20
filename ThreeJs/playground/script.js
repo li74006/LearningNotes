@@ -74,16 +74,62 @@ gltfLoader.load("./public/models/Portal/Portal.glb", (gltf) => {
 const fireflyGeometry = new THREE.BufferGeometry();
 const fireflyCount = 30;
 const fireflyPositionArray = new Float32Array(fireflyCount * 3);
+const fireflyScaleArray = new Float32Array(fireflyCount);
+
 for (let i = 0; i < fireflyCount; i++) {
   fireflyPositionArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
   fireflyPositionArray[i * 3 + 1] = Math.random() * 1.5;
   fireflyPositionArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
-}
-fireflyGeometry.setAttribute("position", new THREE.BufferAttribute(fireflyPositionArray, 3));
 
-const fireflyMaterial = new THREE.PointsMaterial({ size: 0.1, sizeAttenuation: true });
+  fireflyScaleArray[i] = Math.random();
+}
+
+fireflyGeometry.setAttribute("position", new THREE.BufferAttribute(fireflyPositionArray, 3));
+fireflyGeometry.setAttribute("aScale", new THREE.BufferAttribute(fireflyScaleArray, 1));
+
+const fireflyMaterial = new THREE.ShaderMaterial({ 
+  depthWrite: false, // 不会产生粒子之间的遮挡 bug
+  blending: THREE.AdditiveBlending,
+  transparent: true,
+  uniforms:{
+    uPixelRatio:{ value:Math.min(window.devicePixelRatio, 2 )},
+    uSize: { value: 200},
+    uTime: {value: 0}
+  },
+
+  vertexShader:`
+  uniform float uPixelRatio;
+  uniform float uSize;
+  uniform float uTime;
+
+  attribute float aScale;
+
+  void main(){
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+    modelPosition.y += sin(uTime + modelPosition.x) * aScale * 0.1;
+
+    vec4 viewPosition = viewMatrix * modelPosition;
+    vec4 projectionPosition = projectionMatrix * viewPosition;
+
+    gl_Position = projectionPosition;
+    gl_PointSize = uSize * aScale * uPixelRatio ; // uPixelRatio 确保不同屏幕间 firefly 大小一致，aScale 随机每个 firefly 大小
+    gl_PointSize *= -(1.0 / viewPosition.z);
+  }
+  `,
+
+  fragmentShader:`
+  void main(){
+    float distanceToCenter = distance(gl_PointCoord, vec2(0.5));
+    float strength = 0.05 / distanceToCenter - 0.05 * 2.0;
+
+    gl_FragColor = vec4(1.0, 1.0, 1.0, strength);
+  }
+  `
+});
 const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial);
 scene.add(fireflies);
+
+gui.add(fireflyMaterial.uniforms.uSize, 'value').min(0).max(200).step(1).name('firefleSize')
 
 /**
  * Sizes
@@ -105,6 +151,9 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Update fireflies 保证切换屏幕后，即使 pixeRatio 变化，firefly 大小也能保持一致
+  fireflyMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
 });
 
 /**
@@ -146,7 +195,8 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update
+  // Update uTime
+  fireflyMaterial.uniforms.uTime.value = elapsedTime;
 
   // Update controls
   controls.update();
