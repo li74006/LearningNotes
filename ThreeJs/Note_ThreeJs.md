@@ -2780,7 +2780,7 @@ tick();
 
 bookmark : 2023-03-10 P27 着色器听完了！就干就行！
 
-# P28 : Shader Patterns
+### P28 : Shader Patterns
 
 本节代码：
 

@@ -166,7 +166,7 @@ insufficient funds ~
 
 ### 2.10 : The EVM & A Recap of Lesson 2
 
-> EVM : Ethereum Virtual Machine.是一种将智能合约部署到一天放的标准；任何执行 EVM 标准的区块链，我们都可以把 solidity 代码部署上去，例如 ：Avalanche， Fanton， Polygon。
+> EVM : Ethereum Virtual Machine.是一种将智能合约部署到以太坊的标准；任何执行 EVM 标准的区块链，我们都可以把 solidity 代码部署上去，例如 ：Avalanche， Fanton， Polygon。
 
 ### 3.1 : Remix Storage Factory
 
