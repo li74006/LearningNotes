@@ -197,3 +197,4 @@ contract StorageFactory{
 ### 3.3 : Interacting with other Contracts
 
 bookmark : 2023-03-22 今天是真的干累了，明天开始，继续学习！！！从 3:16:36 接着听！！！👺
+bookmark : 2023-03-23 虽然没咋听，但是逐渐上道了，并且还顺利的将 remixd 接入到本地 fs ~ 干了兄弟们！
