@@ -199,3 +199,106 @@ contract StorageFactory{
 bookmark : 2023-03-22 今天是真的干累了，明天开始，继续学习！！！从 3:16:36 接着听！！！👺
 bookmark : 2023-03-23 虽然没咋听，但是逐渐上道了，并且还顺利的将 remixd 接入到本地 fs ~ 干了兄弟们！
 bookmark : 2023-03-25 看到 3:23:14 了，开始能看懂了~
+
+本节代码：
+
+SimpleStorage.sol
+
+```sol
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.7;
+// pragma solidity ^0.8.0;
+// pragma solidity >=0.8.0 <0.9.0;
+
+contract SimpleStorage {
+
+    uint256 favoriteNumber;
+    mapping(string => uint256) public nameToFavoriteNumber;
+
+    struct People {
+        uint256 favoriteNumber;
+        string name;
+    }
+    // uint256[] public anArray;
+    People[] public people;
+
+
+    function store(uint256 _favoriteNumber) public virtual {
+        favoriteNumber = _favoriteNumber;
+    }
+
+    function retrieve() public view returns (uint256){
+        return favoriteNumber;
+    }
+
+    function returnFn(string memory key) public view returns(uint256){
+        return nameToFavoriteNumber[key];
+    }
+
+    function addPerson(string memory _name, uint256 _favoriteNumber) public {
+        people.push(People(_favoriteNumber, _name));
+        nameToFavoriteNumber[_name] = _favoriteNumber;
+    }
+}
+```
+
+StorageFactory.sol
+
+```sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import './SimpleStorage.sol';
+
+contract StorageFactory {
+    SimpleStorage[] public simpleStorageArray;
+
+    function createSimpleStorageContract() public {
+        SimpleStorage simpleStorage = new SimpleStorage();
+        simpleStorageArray.push(simpleStorage);
+    }
+
+    function sfStore(uint256 _simpleStorageIndex, uint256 _simpleStorageNumber) public {
+        // 当与其他合同互动的时候，需要以下两个参数
+        // 1.  Address ： 其他合同的地址
+        // 2. ABI ： Application Binary Interface ABI - 告诉合同如何与其他合同互动
+        simpleStorageArray[_simpleStorageIndex].store(_simpleStorageNumber);
+    }
+
+    function sfGet(uint256 _simpleStorageIndex) public view returns(uint256){
+        return simpleStorageArray[_simpleStorageIndex].retrieve(); // retrieve : 找回、取回
+    }
+}
+```
+
+### 3.4 : Inheritance & Overrides
+
+本节代码：
+
+ExtraStorage.sol
+
+```sol
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import './SimpleStorage.sol';
+
+contract ExtraStorage is SimpleStorage {
+
+function store (uint256 _favoriteNumber) public override {
+    favoriteNumber = _favoriteNumber + 5;
+    }
+}
+```
+
+### 3.5 : Lession 3 Recap
+
+### 4.1 : Remix Fund Me
+
+### 4.2 : Sending ETH Through a Function & Reverts
+
+如果 require 不符合条件，会取消之前 require 之前的操作，返回 require 之后的 gas，但 require 之前消耗的 gas 不会返还。
+
+bookmark : 2023-03-26 看到 3:42:29。
