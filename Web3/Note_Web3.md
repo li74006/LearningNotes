@@ -302,3 +302,11 @@ function store (uint256 _favoriteNumber) public override {
 如果 require 不符合条件，会取消之前 require 之前的操作，返回 require 之后的 gas，但 require 之前消耗的 gas 不会返还。
 
 bookmark : 2023-03-26 看到 3:42:29。
+
+### 4.3 : Chainlink & Oracles
+
+语速太快，根本听不懂妈的，极快的介绍了 chainlink 是作用和原理，主要就是为了解决 去中心化 接入 链下的问题。
+
+### 4.4 : Review of Sending ETH And working with Chainlink
+
+bookmark : 2023-03-27 看到 4:00:30,早上看了 15min，但是纯听英文效果十分差，用 clash 又能翻出去了，接下来还是得上油管看字幕听。

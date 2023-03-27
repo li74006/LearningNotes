@@ -8,6 +8,8 @@ pragma solidity ^0.8.0;
 
 contract fundMe {
 
+    uint256 public miniumUsd = 50;
+
     function fund() public payable{
         require(msg.value > 1e18, "Didn't send enough~"); // 1e18 = 1 * 10 ** 18 = 1000000000000000000
     }
