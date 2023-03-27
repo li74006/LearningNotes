@@ -310,3 +310,9 @@ bookmark : 2023-03-26 看到 3:42:29。
 ### 4.4 : Review of Sending ETH And working with Chainlink
 
 bookmark : 2023-03-27 看到 4:00:30,早上看了 15min，但是纯听英文效果十分差，用 clash 又能翻出去了，接下来还是得上油管看字幕听。
+
+### 4.5 : Importing from Github & NPM
+
+### 4.6 : Floating Point Math in Solidity
+
+bookmark : 2023-03-27 看到 4:15:21,中午看了 15min。
