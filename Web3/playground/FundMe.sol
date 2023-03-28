@@ -27,8 +27,8 @@ contract fundMe {
     }
 
     // 获取汇率
-    function getConversionRate() public{
-
+    function getConversionRate(uint256 ethAmount) public view return (uint256){
+        uint256 ethPrice
     }
 
     // function withdraw(){}

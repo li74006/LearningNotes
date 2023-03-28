@@ -54,6 +54,8 @@ EIP 1559 Explained : https://www.youtube.com/watch?v=MGemhK9t44Q
 
 > Consensus : Is the mechanism（机制） used to agree on the state of a blockchain.
 
+## Lesson 2 : Simple Storage
+
 ### 2.1 : Welcome to Remix!
 
 > Remix ID（集成开发环境） : https://remix.ethereum.org/
@@ -167,6 +169,8 @@ insufficient funds ~
 ### 2.10 : The EVM & A Recap of Lesson 2
 
 > EVM : Ethereum Virtual Machine.是一种将智能合约部署到以太坊的标准；任何执行 EVM 标准的区块链，我们都可以把 solidity 代码部署上去，例如 ：Avalanche， Fanton， Polygon。
+
+## Lesson 3 : Remix Storage Factory
 
 ### 3.1 : Remix Storage Factory
 
@@ -295,6 +299,8 @@ function store (uint256 _favoriteNumber) public override {
 
 ### 3.5 : Lession 3 Recap
 
+## Lesson 4 : Remix Fund Me
+
 ### 4.1 : Remix Fund Me
 
 ### 4.2 : Sending ETH Through a Function & Reverts
@@ -316,3 +322,4 @@ bookmark : 2023-03-27 看到 4:00:30,早上看了 15min，但是纯听英文效�
 ### 4.6 : Floating Point Math in Solidity
 
 bookmark : 2023-03-27 看到 4:15:21,中午看了 15min。
+bookmark : 2023-03-28 看到 4:16:39。
