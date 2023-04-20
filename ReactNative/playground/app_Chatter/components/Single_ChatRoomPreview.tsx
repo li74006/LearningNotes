@@ -1,31 +1,51 @@
 import { StyleSheet } from "react-native";
 
-import EditScreenInfo from "../../components/EditScreenInfo";
-import { Text, View } from "../../components/Themed";
+import EditScreenInfo from "./EditScreenInfo";
+import { Text, View } from "./Themed";
 import { Image } from "react-native";
 
-import Single_ChatRoomPreview from "../../components/Single_ChatRoomPreview";
-import ChatRooms from "../../assets/dummy-data/ChatRooms";
-
-const data1 = ChatRooms[0];
-const data2 = ChatRooms[1];
-
-export default function TabOneScreen() {
+export default function Single_ChatPreview({ data_roomPreview }) {
+  const user = data_roomPreview.users[1];
   return (
     <View style={styles.container}>
-      <Single_ChatRoomPreview data_roomPreview={data1} />
+      <View style={styles.avatar}>
+        <Image
+          source={{
+            uri: user.imageUri,
+          }}
+          style={styles.image}
+        />
+
+        {data_roomPreview.newMessage && (
+          <View style={styles.badgeCont}>
+            <Text style={styles.badgeText}>{data_roomPreview.newMessage}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.textContainer}>
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.msgTime}>
+            {data_roomPreview.lastMessage.createdAt}
+          </Text>
+        </View>
+        <Text numberOfLines={1} style={styles.messagePreview}>
+          {data_roomPreview.lastMessage.content}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
+    flexDirection: "row",
     padding: 10,
   },
 
   avatar: {
-    marginLeft: 10,
+    marginLeft: 0,
     marginRight: 14,
     flexDirection: "row",
   },
