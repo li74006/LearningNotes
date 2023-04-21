@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 import EditScreenInfo from "../../components/EditScreenInfo";
 import { Text, View } from "../../components/Themed";
-import { Image } from "react-native";
+import { Image, FlatList } from "react-native";
 
 import Single_ChatRoomPreview from "../../components/Single_ChatRoomPreview";
 import ChatRooms from "../../assets/dummy-data/ChatRooms";
@@ -13,7 +13,12 @@ const data2 = ChatRooms[1];
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
-      <Single_ChatRoomPreview data_roomPreview={data1} />
+      <FlatList
+        data={ChatRooms}
+        renderItem={({ item }) => (
+          <Single_ChatRoomPreview data_roomPreview={item} />
+        )}
+      />
     </View>
   );
 }
