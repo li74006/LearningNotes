@@ -15,9 +15,12 @@ export default function TabOneScreen() {
     <View style={styles.container}>
       <FlatList
         data={ChatRooms}
+        // horizontal // 控制 FlatList 滚动方向
+        showsVerticalScrollIndicator={false} // 是否显示垂直滚动条
         renderItem={({ item }) => (
           <Single_ChatRoomPreview data_roomPreview={item} />
         )}
+        // ListHeaderComponent={() => <Text>Hello</Text>}
       />
     </View>
   );
