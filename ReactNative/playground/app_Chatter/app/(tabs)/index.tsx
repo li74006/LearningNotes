@@ -5,6 +5,7 @@ import { Text, View } from "../../components/Themed";
 import { Image, FlatList } from "react-native";
 
 import Single_ChatRoomPreview from "../../components/Single_ChatRoomPreview";
+import Single_ChatRoom from "../../components/Single_ChatRoom";
 import ChatRooms from "../../assets/dummy-data/ChatRooms";
 
 const data1 = ChatRooms[0];
@@ -12,16 +13,19 @@ const data2 = ChatRooms[1];
 
 export default function TabOneScreen() {
   return (
+    // <View style={styles.container}>
+    //   <FlatList
+    //     data={ChatRooms}
+    //     // horizontal // 控制 FlatList 滚动方向
+    //     showsVerticalScrollIndicator={false} // 是否显示垂直滚动条
+    //     renderItem={({ item }) => (
+    //       <Single_ChatRoomPreview data_roomPreview={item} />
+    //     )}
+    //     // ListHeaderComponent={() => <Text>Hello</Text>}
+    //   />
+    // </View>
     <View style={styles.container}>
-      <FlatList
-        data={ChatRooms}
-        // horizontal // 控制 FlatList 滚动方向
-        showsVerticalScrollIndicator={false} // 是否显示垂直滚动条
-        renderItem={({ item }) => (
-          <Single_ChatRoomPreview data_roomPreview={item} />
-        )}
-        // ListHeaderComponent={() => <Text>Hello</Text>}
-      />
+      <Single_ChatRoom />
     </View>
   );
 }
