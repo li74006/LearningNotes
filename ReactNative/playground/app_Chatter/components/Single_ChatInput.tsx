@@ -1,15 +1,38 @@
 import { useState } from "react";
-import { SafeAreaView, View, Text, TextInput, InputAccessoryView, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 
 export default function Single_ChatInput() {
   const [input, setInput] = useState("");
 
+  const sendText = () => {
+    console.log("Sending:" + input);
+  };
+
+  const onPress = () => {
+    if (input) {
+      sendText();
+    } else {
+      console.log("empty");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TextInput value={input} onChangeText={setInput} style={styles.input} placeholder="Shoot something..." />
-      <View style={styles.plus}>
-        <Text style={styles.text_plus}>+</Text>
-      </View>
+      <Pressable onPress={onPress}>
+        <View style={styles.plus}>
+          <Text style={styles.text_plus}>+</Text>
+        </View>
+      </Pressable>
     </View>
   );
 }
