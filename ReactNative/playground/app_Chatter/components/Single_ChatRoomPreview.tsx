@@ -2,12 +2,21 @@ import { StyleSheet } from "react-native";
 
 import EditScreenInfo from "./EditScreenInfo";
 import { Text, View } from "./Themed";
-import { Image } from "react-native";
+import { Image, Pressable } from "react-native";
+import { useNavigation, useRouter } from "expo-router";
 
 export default function Single_ChatPreview({ data_roomPreview }) {
   const user = data_roomPreview.users[1];
+  const navigation = useNavigation();
+  const router = useRouter();
+
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      onPress={() => {
+        router.push({ pathname: "/Single_ChatRoom", params: { id: data_roomPreview.id } });
+      }}
+    >
       <View style={styles.avatar}>
         <Image
           source={{
@@ -26,15 +35,13 @@ export default function Single_ChatPreview({ data_roomPreview }) {
       <View style={styles.textContainer}>
         <View style={styles.nameRow}>
           <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.msgTime}>
-            {data_roomPreview.lastMessage.createdAt}
-          </Text>
+          <Text style={styles.msgTime}>{data_roomPreview.lastMessage.createdAt}</Text>
         </View>
         <Text numberOfLines={1} style={styles.messagePreview}>
           {data_roomPreview.lastMessage.content}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

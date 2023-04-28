@@ -43,6 +43,9 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     flexDirection: "row",
     alignSelf: "flex-end",
+    marginHorizontal: 10,
+    marginTop: 10,
+    marginBottom: 2,
   },
 
   input: {

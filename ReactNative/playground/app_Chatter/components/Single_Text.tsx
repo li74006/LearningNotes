@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 const selfId = "u1";
 
-export default function Single_Dialogue({ data_Dialogue }) {
+export default function Single_Dialogue({ data_Dialogue }: any) {
   const isSelf = data_Dialogue.user.id === selfId;
   const styles = StyleSheet.create({
     container: {

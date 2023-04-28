@@ -5,7 +5,7 @@ import { Text, View } from "../../components/Themed";
 import { Image, FlatList } from "react-native";
 
 import Single_ChatRoomPreview from "../../components/Single_ChatRoomPreview";
-import Single_ChatRoom from "../../components/Single_ChatRoom";
+import Single_ChatRoom from "../Single_ChatRoom";
 import ChatRooms from "../../assets/dummy-data/ChatRooms";
 
 const data1 = ChatRooms[0];
