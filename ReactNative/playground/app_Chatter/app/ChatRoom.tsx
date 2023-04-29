@@ -1,12 +1,15 @@
 import { FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import Single_Dialogue from "../components/Single_Text";
+import { Stack } from "expo-router";
+
+import { HeaderHeightContext } from "@react-navigation/elements";
 
 import ChatRoomData from "../assets/dummy-data/Chats";
 import Single_ChatInput from "../components/Single_ChatInput";
+import Single_HomeHeader from "../components/Single_HomeHeader";
 
 export default function ChatRoom() {
-  const isSelf = true;
   const styles = StyleSheet.create({
     container: {
       height: "100%",
@@ -14,10 +17,16 @@ export default function ChatRoom() {
   });
 
   const route = useRoute();
-  console.log("route params:" + route.params?.id);
 
   return (
     <SafeAreaView>
+      <Stack.Screen
+        options={{
+          headerBackVisible: true,
+          headerBackTitleVisible: true,
+          headerTitle: Single_HomeHeader,
+        }}
+      />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

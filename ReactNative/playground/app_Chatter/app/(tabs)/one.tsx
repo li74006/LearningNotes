@@ -5,11 +5,8 @@ import { Text, View } from "../../components/Themed";
 import { Image, FlatList } from "react-native";
 
 import Single_ChatRoomPreview from "../../components/Single_ChatRoomPreview";
-import Single_ChatRoom from "../Single_ChatRoom";
+import Single_ChatRoom from "../ChatRoom";
 import ChatRooms from "../../assets/dummy-data/ChatRooms";
-
-const data1 = ChatRooms[0];
-const data2 = ChatRooms[1];
 
 export default function TabOneScreen() {
   return (
@@ -24,9 +21,7 @@ export default function TabOneScreen() {
     //     // ListHeaderComponent={() => <Text>Hello</Text>}
     //   />
     // </View>
-    <View style={styles.container}>
-      <Single_ChatRoom />
-    </View>
+    <View style={styles.container}>kkkW</View>
   );
 }
 

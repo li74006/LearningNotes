@@ -14,7 +14,7 @@ export default function Single_ChatPreview({ data_roomPreview }) {
     <Pressable
       style={styles.container}
       onPress={() => {
-        router.push({ pathname: "/Single_ChatRoom", params: { id: data_roomPreview.id } });
+        router.push({ pathname: "/ChatRoom", params: { id: data_roomPreview.id } });
       }}
     >
       <View style={styles.avatar}>
