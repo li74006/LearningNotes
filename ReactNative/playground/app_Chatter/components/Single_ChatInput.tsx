@@ -1,14 +1,5 @@
 import { useState } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 
 export default function Single_ChatInput() {
   const [input, setInput] = useState("");

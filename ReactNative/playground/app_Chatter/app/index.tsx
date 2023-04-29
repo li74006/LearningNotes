@@ -1,12 +1,20 @@
 import { View } from "../components/Themed";
-import { StyleSheet, FlatList } from "react-native";
+import { StyleSheet, FlatList, Text, Image, SafeAreaView } from "react-native";
+
+import { Stack } from "expo-router";
 
 import Single_ChatRoomPreview from "../components/Single_ChatRoomPreview";
 import ChatRooms from "../assets/dummy-data/ChatRooms";
+import Single_HomeHeader from "../components/Single_HomeHeader";
 
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          header: Single_HomeHeader,
+        }}
+      />
       <FlatList
         data={ChatRooms}
         // horizontal // 控制 FlatList 滚动方向
@@ -20,6 +28,7 @@ export default function TabOneScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: "column",
     padding: 10,
   },
