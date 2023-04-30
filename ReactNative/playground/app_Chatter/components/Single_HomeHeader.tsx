@@ -1,8 +1,11 @@
 import { StyleSheet, Text, View, Image, useWindowDimensions } from "react-native";
 
 export default function Single_HomeHeader() {
+  const { width } = useWindowDimensions();
+
   const styles = StyleSheet.create({
     container: {
+      width,
       flexDirection: "row",
       justifyContent: "space-between",
       margin: -16, // 左右默认 16px 的 margin 无法取消，只能手动清除
@@ -10,9 +13,9 @@ export default function Single_HomeHeader() {
       paddingHorizontal: 18,
     },
     avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 30,
+      height: 30,
+      borderRadius: 10,
     },
   });
 
@@ -23,6 +26,7 @@ export default function Single_HomeHeader() {
         style={styles.avatar}
       />
       <Text style={{ textAlign: "center", fontSize: 18, fontWeight: "500" }}>Home</Text>
+      <Text style={{ fontSize: 26, width: 30, textAlign: "center" }}>+</Text>
     </View>
   );
 }
