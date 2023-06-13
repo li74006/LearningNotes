@@ -264,3 +264,54 @@ export default Button;
 
 如何像 clacsName 中添加多个 styles：
 `<ul className={[styles.listGroup, styles.container].join(' ')}>`
+
+## Managing Component State
+
+### 6 : Updating Objects
+
+useState 中的对象是只读的，需要声明一个新对象然后用 setDrink 对 drink 进行赋值。
+
+```tsx
+const [drink, setDrink] = useState({
+  title: "Mojito",
+  price: 5,
+  taste：{
+    ice:10,
+    sweet:10
+  }
+});
+
+const [names, setNames] = useState(['ohc','li74006'])
+
+
+const handleClick = () => {
+
+  // 更新对象
+  setDrink({ ...drink, price: 6, taste:{...drink.taste, sweet:5} }); // 这里使用扩展操作符更加简洁
+
+  // 更新数组
+
+  // Add
+  setNames([...names, 'lanlan'])
+
+  // Remove
+  setNames(names.filter(name => name !== 'li74006'))
+
+  // Update
+  setNames(names.map(name => name == 'ohc' ? 'ohcysp' : name))
+};
+
+```
+
+`npm i immer` 使用 immer 进行数据更新
+
+```tsx
+import produce from "immer";
+
+setBugs(
+  produce((draft) => {
+    const bug = draft.find((bug) => bug.id === 1);
+    if (bug) bug.fixed = true;
+  })
+);
+```
