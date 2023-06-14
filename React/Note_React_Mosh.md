@@ -315,3 +315,147 @@ setBugs(
   })
 );
 ```
+
+## Building Forms
+
+### useRef Hook
+
+Form.tsx
+
+```tsx
+import { FormEvent, useRef } from "react";
+
+const Form = () => {
+  const nameRef = useRef<HTMLInputElement>(null);
+  const ageRef = useRef<HTMLInputElement>(null);
+  const person = {
+    name: "",
+    age: 0,
+  };
+
+  const handelSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (nameRef.current !== null) person.name = nameRef.current.value;
+    if (ageRef.current !== null) person.age = parseInt(ageRef.current.value); // 因为 useRef 的 value 是字符串，但是上面声明的 person.age 变量是 number,所以将其解析为数字就不会报错了
+    console.log(person);
+  };
+
+  return (
+    <form onSubmit={handelSubmit}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input ref={nameRef} id="name" type="text" className="form-control" />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="" className="form-label">
+          Age
+        </label>
+        <input ref={ageRef} type="number" className="form-control" />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+### useState Hook
+
+Form.tsx
+
+```tsx
+import { FormEvent, useState } from "react";
+
+const Form = () => {
+  const [person, setPerson] = useState({
+    name: "",
+    age: "",
+  });
+
+  const handelSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    console.log(person);
+  };
+
+  return (
+    <form onSubmit={handelSubmit}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input
+          value={person.name}
+          onChange={(e) => {
+            setPerson({ ...person, name: e.target.value });
+          }}
+          id="name"
+          type="text"
+          className="form-control"
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="" className="form-label">
+          Age
+        </label>
+        <input
+          value={person.age}
+          onChange={(e) => {
+            setPerson({ ...person, age: parseInt(e.target.value) });
+          }}
+          type="number"
+          className="form-control"
+        />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+### Managing Forms with React Hook Form
+
+`npm i react-hook-form`
+
+Form.tsx
+
+```tsx
+import { useForm, FieldValues } from "react-hook-form";
+
+const Form = () => {
+  const { register, handleSubmit } = useForm();
+
+  const onSubmit = (data: FieldValues) => console.log(data);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input {...register("name")} id="name" type="text" className="form-control" />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="" className="form-label">
+          Age
+        </label>
+        <input {...register("age")} type="number" className="form-control" />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+```

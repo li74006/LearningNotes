@@ -1,5 +1,4 @@
-import Button from "./components/Button";
-import Alert from "./components/Alert";
+import Form from "./components/Form";
 import { useState } from "react";
 
 function App() {
@@ -7,8 +6,7 @@ function App() {
 
   return (
     <div>
-      {alertVisible && <Alert onClose={() => setAlertVisible(false)}>Alert something...</Alert>}
-      <Button name="点我" onClick={() => setAlertVisible(!alertVisible)} type={"warning"} />
+      <Form />
     </div>
   );
 }
