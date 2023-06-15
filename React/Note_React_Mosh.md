@@ -459,3 +459,57 @@ const Form = () => {
 
 export default Form;
 ```
+
+### Applying Validation
+
+Form.tsx
+
+```tsx
+import { useForm, FieldValues } from "react-hook-form";
+
+interface FormData {
+  name: string;
+  age: number;
+}
+
+const Form = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>(); // formState 使用到了嵌套解构
+
+  console.log(errors);
+
+  const onSubmit = (data: FieldValues) => console.log(errors, data);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input {...register("name", { required: true, minLength: 3 })} id="name" type="text" className="form-control" />
+        {errors.name?.type === "required" && <p className="text-danger">The name is required.</p>}
+        {errors.name?.type === "minLength" && <p className="text-danger">The name must be at least 3 characters.</p>}
+      </div>
+      <div className="mb-3">
+        <label htmlFor="" className="form-label">
+          Age
+        </label>
+        <input {...register("age")} type="number" className="form-control" />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+### Schema based Validation
+
+常用认证库：Joi、Yup、Zod
+`npm i zod`

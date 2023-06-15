@@ -1,9 +1,24 @@
 import { useForm, FieldValues } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const schema = z.object({
+  name: z.string().min(3, { message: "用户名至少三个字母" }),
+  age: z.number({ invalid_type_error: "需要填写年龄" }).min(18, { message: "年龄至少为18岁" }),
+});
+
+type FormData = z.infer<typeof schema>;
 
 const Form = () => {
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormData>({ resolver: zodResolver(schema) }); // formState 使用到了嵌套解构
 
-  const onSubmit = (data: FieldValues) => console.log(data);
+  console.log(errors);
+
+  const onSubmit = (data: FieldValues) => console.log(errors, data);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -12,14 +27,16 @@ const Form = () => {
           Name
         </label>
         <input {...register("name")} id="name" type="text" className="form-control" />
+        {errors.name && <p className="text-danger">{errors.name.message}</p>}
       </div>
       <div className="mb-3">
         <label htmlFor="" className="form-label">
           Age
         </label>
-        <input {...register("age")} type="number" className="form-control" />
+        <input {...register("age", { valueAsNumber: true })} type="number" className="form-control" />
+        {errors.age && <p className="text-danger">{errors.age.message}</p>}
       </div>
-      <button className="btn btn-primary" type="submit">
+      <button disabled={!isValid} className="btn btn-primary" type="submit">
         Submit
       </button>
     </form>
