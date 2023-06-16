@@ -1,10 +1,3 @@
-import { useState } from "react";
-import { useForm, FieldValues } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Table
-
 interface Expense {
   id: number;
   description: string;
@@ -17,20 +10,10 @@ interface Props {
   onDelete: (id: number) => void;
 }
 const ExpenseList = ({ expenses, onDelete }: Props) => {
-  const { register, handleSubmit } = useForm();
-
-  const [totalData, setTotalData] = useState<any>([]);
-
-  const onSubmit = (data: FieldValues) => {
-    let handleData = { ...data, id: Date.now() };
-    setTotalData(() => {});
-    console.log(totalData);
-  };
-
   if (expenses.length === 0) return null;
 
   return (
-    <div className="mt-5">
+    <div className="mt-3">
       <table className="table table-border">
         <thead>
           <tr>
