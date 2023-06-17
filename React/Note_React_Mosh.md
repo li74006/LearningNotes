@@ -513,3 +513,445 @@ export default Form;
 
 常用认证库：Joi、Yup、Zod
 `npm i zod`
+
+### Exercise
+
+App.tsx
+
+```tsx
+import { useState } from "react";
+import ExpenseList from "./components/Exercise_Expense/components/ExpenseList";
+import ExpenseFilter from "./components/Exercise_Expense/components/ExpenseFilter";
+import ExpenseForm from "./components/Exercise_Expense/components/ExpenseForm";
+function App() {
+  const [expenses, setExpenses] = useState([
+    { id: 1, description: "aaa", amount: 10, category: "Groceries" },
+    { id: 2, description: "bbb", amount: 10, category: "Utilities" },
+    { id: 3, description: "ccc", amount: 10, category: "Utilities" },
+    { id: 4, description: "ddd", amount: 10, category: "Entertainment" },
+  ]);
+
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  const visibleExpenses = selectedCategory ? expenses.filter((e) => e.category === selectedCategory) : expenses;
+
+  return (
+    <div>
+      <ExpenseForm onSubmit={(expense) => setExpenses([...expenses, { ...expense, id: expenses.length + 1 }])} />
+      <ExpenseFilter onSelectCategory={(category) => setSelectedCategory(category)} />
+      <ExpenseList
+        expenses={visibleExpenses}
+        onDelete={(id) => {
+          setExpenses(expenses.filter((e) => e.id !== id));
+        }}
+      />
+    </div>
+  );
+}
+
+export default App;
+```
+
+其他 .tsx
+
+React\playground\Course-Mosh\src\components\Exercise_Expense
+
+## Connecting to the Backend
+
+### Understanding the Effect Hook
+
+App.tsx
+
+```tsx
+import { useEffect, useRef } from "react";
+
+function App() {
+  const ref = useRef<HTMLInputElement>(null);
+
+  // after render
+  useEffect(() => {
+    console.log(ref);
+    if (ref.current) ref.current.focus();
+  });
+
+  useEffect(() => {
+    document.title = "Psycho";
+  });
+
+  return (
+    <div>
+      <input ref={ref} type="text" className="form-control" />
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Effect Dependencies
+
+App.tsx
+
+```tsx
+import { useState } from "react";
+import ProductList from "./components/ProductList";
+
+function App() {
+  const [category, setCategory] = useState("");
+
+  return (
+    <div>
+      <select name="" id="" className="form-select" onChange={(e) => setCategory(e.target.value)}>
+        <option value=""></option>
+        <option value="Clothing">Clothing</option>
+        <option value="Household">Household</option>
+      </select>
+      <ProductList category={category} />
+    </div>
+  );
+}
+
+export default App;
+```
+
+ProductList.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+
+const ProductList = ({ category }: { category: string }) => {
+  const [product, setProduct] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log("Fecting products in", category);
+    setProduct(["clothing", "household"]);
+  }, [category]);
+
+  return <div>ProductList</div>;
+};
+
+export default ProductList;
+```
+
+### Effect Clean Up
+
+App.tsx
+
+```tsx
+import { useEffect } from "react";
+import ProductList from "./components/ProductList";
+
+const connect = () => console.log("Connecting");
+const disconnect = () => console.log("Disconnecting");
+
+function App() {
+  useEffect(() => {
+    connect();
+
+    return () => disconnect(); // 这一步相当于会在组件 unmount 时候执行
+  });
+
+  return <div></div>;
+}
+
+export default App;
+```
+
+### Fetching Data
+
+有各种假数据：[JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+
+App.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function App() {
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    axios.get<User[]>("https://jsonplaceholder.typicode.com/users").then((res) => setUsers(res.data));
+  }, []);
+  return (
+    <ul>
+      {users.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default App;
+```
+
+### Handling Errors
+
+App.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function App() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    axios
+      .get<User[]>("https://jsonplaceholder.typicode.com/users")
+      .then((res) => setUsers(res.data))
+      .catch((err) => setError(err.message));
+  }, []);
+
+  return (
+    <>
+      {error && <p className="text-danger">{error}</p>}
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+export default App;
+```
+
+### Working with Async and Await
+
+App.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function App() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get<User[]>("https://jsonplaceholder.typicode.com/user");
+        setUsers(res.data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  return (
+    <>
+      {error && <p className="text-danger">{error}</p>}
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+### Cancelling a Fetch Request
+
+App.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+import axios, { CanceledError } from "axios";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function App() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    axios
+      .get<User[]>("https://jsonplaceholder.typicode.com/users", { signal: controller.signal })
+      .then((res) => setUsers(res.data))
+      .catch((err) => {
+        if (err instanceof CanceledError) return;
+        setError(err.message);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  return (
+    <>
+      {error && <p className="text-danger">{error}</p>}
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+export default App;
+```
+
+### Showing a Loading Indicator
+
+App.tsx
+
+```tsx
+import { useState, useEffect } from "react";
+import axios, { CanceledError } from "axios";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function App() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setIsLoading(true);
+
+    axios
+      .get<User[]>("https://jsonplaceholder.typicode.com/users", { signal: controller.signal })
+      .then((res) => {
+        setUsers(res.data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        if (err instanceof CanceledError) return;
+        setError(err.message);
+        setIsLoading(false);
+      })
+      .finally(() => {
+        // setIsLoading(false); // 据说在 react 的 strict 模式下不好使
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  return (
+    <>
+      {error && <p className="text-danger">{error}</p>}
+      {isLoading && <div className="spinner-border"></div>}
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+export default App;
+```
+
+### Extracting a Reusable API Client
+
+http-service.ts
+
+```ts
+import apiClient from "./api-client";
+
+interface Entity {
+  id: number;
+}
+
+class HttpService {
+  endpoint: string;
+
+  constructor(endpoint: string) {
+    this.endpoint = endpoint;
+  }
+
+  getAll<T>() {
+    const controller = new AbortController();
+    const request = apiClient.get<T[]>(this.endpoint, {
+      signal: controller.signal,
+    });
+    return { request, cancel: () => controller.abort() };
+  }
+
+  delete(id: number) {
+    return apiClient.delete(this.endpoint + "/" + id);
+  }
+
+  create<T>(entity: T) {
+    return apiClient.post(this.endpoint, entity);
+  }
+
+  update<T extends Entity>(entity: T) {
+    return apiClient.patch(this.endpoint + "/" + entity.id, entity);
+  }
+}
+
+const create = (endpoint: string) => new HttpService(endpoint);
+
+export default create;
+```
+
+### Creating a Custom Data Fetching Hook
+
+useUsers.ts
+
+```ts
+import { useEffect, useState } from "react";
+import { CanceledError } from "../services/api-client";
+import userService, { User } from "../services/user-service";
+
+const useUsers = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState("");
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const { request, cancel } = userService.getAll<User>();
+    request
+      .then((res) => {
+        setUsers(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err instanceof CanceledError) return;
+        setError(err.message);
+        setLoading(false);
+      });
+
+    return () => cancel();
+  }, []);
+
+  return { users, error, isLoading, setUsers, setError };
+};
+
+export default useUsers;
+```
