@@ -25,12 +25,12 @@ function App() {
       <Show above="lg">
         {/* 屏幕尺寸超过 lg 时，显示 <Show></Show> 中的元素 */}
         <GridItem area="aside" pl={5} pt={8}>
-          <GenreList onSelectGenre={(genre) => setSelectedGenre(genre)} />
+          <GenreList onSelectGenre={(genre) => setSelectedGenre(genre)} selectedGenre={selectedGenre} />
         </GridItem>
       </Show>
 
       <GridItem area="main">
-        <GameGrid />
+        <GameGrid selectedGenre={selectedGenre} />
       </GridItem>
     </Grid>
   );
