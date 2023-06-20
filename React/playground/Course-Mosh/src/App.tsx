@@ -1,4 +1,6 @@
+import { useState } from "react";
 import useUsers from "./hooks/useUsers";
+import { Genre } from "./../../Exercise-Mosh/src/hooks/useGenres";
 
 interface User {
   id: number;
