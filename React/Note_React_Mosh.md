@@ -955,3 +955,104 @@ const useUsers = () => {
 
 export default useUsers;
 ```
+
+# Part-2
+
+## Fetching and Updating Data with React Query
+
+### What is React Query
+
+A powerful library for managing data fetching and caching in React applications.
+
+### Handling Errors
+
+TodoList.tsx
+
+```tsx
+import axios from "axios";
+import { useQuery } from "react-query";
+
+interface Todo {
+  id: number;
+  title: string;
+  userId: number;
+  completed: boolean;
+}
+
+const TodoList = () => {
+  const fetchTodos = () => axios.get("https://jsonplaceholder.typicode.com/todos").then((res) => res.data);
+
+  const { data: todos, error } = useQuery<Todo[], Error>({
+    // ReactQuery 不知道使用者用 axios 或者其他方法获取数据，所以要声明相应的 type，否则下面 todos 会报错
+    queryKey: ["todos"],
+    queryFn: fetchTodos,
+  });
+
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <ul className="list-group">
+      {todos?.map((todo) => (
+        <li key={todo.id} className="list-group-item">
+          {todo.title}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default TodoList;
+```
+
+### Creating a Custom Query Hook
+
+useTodos.ts
+
+```ts
+import axios from "axios";
+import { useQuery } from "react-query";
+
+interface Todo {
+  id: number;
+  title: string;
+  userId: number;
+  completed: boolean;
+}
+
+const useTodos = () => {
+  const fetchTodos = () => axios.get("https://jsonplaceholder.typicode.com/todos").then((res) => res.data);
+
+  return useQuery<Todo[], Error>({
+    queryKey: ["todos"],
+    queryFn: fetchTodos,
+  });
+};
+
+export default useTodos;
+```
+
+TodoList.tsx
+
+```tsx
+import useTodos from "../hooks/useTodos";
+
+const TodoList = () => {
+  const { data: todos, error, isLoading } = useTodos();
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <ul className="list-group">
+      {todos?.map((todo) => (
+        <li key={todo.id} className="list-group-item">
+          {todo.title}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default TodoList;
+```
