@@ -1006,6 +1006,8 @@ export default TodoList;
 
 ### Creating a Custom Query Hook
 
+`npm i @tanstack/react-query`
+
 useTodos.ts
 
 ```ts
@@ -1056,3 +1058,305 @@ const TodoList = () => {
 
 export default TodoList;
 ```
+
+### Using React Query Settings
+
+`npm i @tanstack/react-query`
+
+### Parameterized Queries
+
+usePosts.ts
+
+```ts
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
+
+const usePosts = (userId: number | undefined) => {
+  const fetchPosts = () =>
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts", {
+        params: {
+          userId,
+        },
+      })
+      .then((res) => res.data);
+
+  return useQuery<Post[], Error>({
+    queryKey: userId ? ["users", userId, "posts"] : ["posts"],
+    queryFn: fetchPosts,
+    staleTime: 1 * 60 * 1000,
+  });
+};
+
+export default usePosts;
+```
+
+PostList.tsx
+
+```tsx
+import { useState } from "react";
+import usePosts from "../hooks/usePosts";
+
+const PostList = () => {
+  const [userId, setUserId] = useState<number>();
+
+  const { data: posts, error, isLoading } = usePosts(userId);
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <>
+      <select onChange={(e) => setUserId(parseInt(e.target.value))} value={userId} className="form-select mb-3">
+        <option>All</option>
+        <option value="1">User 1</option>
+        <option value="2">User 2</option>
+        <option value="3">User 3</option>
+      </select>
+
+      <ul className="list-group">
+        {posts?.map((post) => (
+          <li key={post.id} className="list-group-item">
+            {post.title}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+};
+
+export default PostList;
+```
+
+### Paginated Queries
+
+usePosts.ts
+
+```ts
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
+
+interface PostQuery {
+  page: number;
+  pageSize: number;
+}
+
+const usePosts = (query: PostQuery) => {
+  const fetchPosts = () =>
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts", {
+        params: {
+          _start: (query.page - 1) * query.pageSize,
+          _limit: query.pageSize,
+        },
+      })
+      .then((res) => res.data);
+
+  return useQuery<Post[], Error>({
+    queryKey: ["posts", query], // useQuery 会监测数组中参数变化而发起请求
+    queryFn: fetchPosts,
+    staleTime: 1 * 60 * 1000,
+    keepPreviousData: true, // 翻页后页面会保持上一页浏览位置
+  });
+};
+
+export default usePosts;
+```
+
+PostList.tsx
+
+```tsx
+import { useState } from "react";
+import usePosts from "../hooks/usePosts";
+
+const PostList = () => {
+  const pageSize = 10;
+  const [page, setPage] = useState(1);
+
+  const { data: posts, error, isLoading } = usePosts({ page, pageSize });
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <>
+      <ul className="list-group">
+        {posts?.map((post) => (
+          <li key={post.id} className="list-group-item">
+            {post.title}
+          </li>
+        ))}
+      </ul>
+      <button disabled={page === 1} onClick={() => setPage(page - 1)} className="btn btn-primary my-3 me-3">
+        Previous
+      </button>
+      <button onClick={() => setPage(page + 1)} className="btn btn-primary">
+        Next
+      </button>
+    </>
+  );
+};
+
+export default PostList;
+```
+
+### Infinite Quries
+
+usePosts.ts
+
+```ts
+import axios from "axios";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
+
+interface PostQuery {
+  pageSize: number;
+}
+
+const usePosts = (query: PostQuery) => {
+  const fetchPosts = (pageParam: number) =>
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts", {
+        params: {
+          _start: (pageParam - 1) * query.pageSize,
+          _limit: query.pageSize,
+        },
+      })
+      .then((res) => res.data);
+
+  return useInfiniteQuery<Post[], Error>({
+    queryKey: ["posts", query], // useQuery 会监测数组中参数变化而发起请求
+    queryFn: ({ pageParam = 1 }) => fetchPosts(pageParam),
+    staleTime: 1 * 60 * 1000,
+    keepPreviousData: true, // 翻页后页面会保持上一页浏览位置
+    getNextPageParam: (lastPage, allPages) => {
+      // 如果最后一页的数组不为空，那么返回下一页页码，将该值给到 queryFn 函数，从而请求下一页内容
+      return lastPage.length > 0 ? allPages.length + 1 : undefined;
+    },
+  });
+};
+
+export default usePosts;
+```
+
+PostList.tsx
+
+```tsx
+import { useState } from "react";
+import usePosts from "../hooks/usePosts";
+import React from "react";
+
+const PostList = () => {
+  const pageSize = 10;
+
+  const { data: posts, error, isLoading, fetchNextPage, isFetchingNextPage } = usePosts({ pageSize });
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <>
+      <ul className="list-group">
+        {posts.pages.map((page, index) => (
+          <React.Fragment key={index}>
+            {page.map((post) => (
+              <li key={post.id} className="list-group-itme">
+                {post.title}
+              </li>
+            ))}
+          </React.Fragment>
+        ))}
+      </ul>
+
+      <button disabled={isFetchingNextPage} onClick={() => fetchNextPage()} className="btn btn-primary">
+        {isFetchingNextPage ? "Loading..." : "Load More"}
+      </button>
+    </>
+  );
+};
+
+export default PostList;
+```
+
+### Mutating Data
+
+TodoForm.tsx
+
+```tsx
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
+import { Todo } from "../hooks/useTodos";
+import axios from "axios";
+
+const TodoForm = () => {
+  const queryClient = useQueryClient();
+
+  const addTodo = useMutation({
+    mutationFn: (todo: Todo) =>
+      axios.post<Todo>("https://jsonplaceholder.typicode.com/todos", todo).then((res) => res.data),
+
+    onSuccess(savedTodo, newTodo) {
+      // 方法一：invalidating the cache
+      // queryClient.invalidateQueries({
+      //   queryKey: ["todos"],
+      // });
+
+      // 方法二：在 cache 中更新数据
+      queryClient.setQueriesData<Todo[]>(["todos"], (todos) => [savedTodo, ...(todos || [])]);
+    },
+  });
+
+  const ref = useRef<HTMLInputElement>(null);
+
+  return (
+    <form
+      className="row mb-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        if (ref.current && ref.current.value)
+          addTodo.mutate({
+            id: 0,
+            title: ref.current?.value,
+            completed: false,
+            userId: 1,
+          });
+      }}
+    >
+      <div className="col">
+        <input ref={ref} type="text" className="form-control" />
+      </div>
+      <div className="col">
+        <button className="btn btn-primary">Add</button>
+      </div>
+    </form>
+  );
+};
+
+export default TodoForm;
+```
+
+### Handling Mutation Errors
