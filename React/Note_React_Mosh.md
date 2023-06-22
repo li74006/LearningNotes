@@ -1359,4 +1359,11 @@ const TodoForm = () => {
 export default TodoForm;
 ```
 
-### Handling Mutation Errors
+### Inplement Infinite Scroll
+
+`npm i react-infinite-scroll-component`
+
+### Simplifying Time Calculations
+
+`npm i ms`
+`npm i -D @types/ms` // @types 只需要在开发环境，所以 -D 或 --save-dev
