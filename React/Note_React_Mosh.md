@@ -1367,3 +1367,23 @@ export default TodoForm;
 
 `npm i ms`
 `npm i -D @types/ms` // @types 只需要在开发环境，所以 -D 或 --save-dev
+
+快捷键：
+<kbd>Shift</kbd> + <kbd>F12</kbd> 或 右键 ：查看被谁引用
+<kbd>Ctrl</kbd> + <kbd>T</kbd> ：可在不同文件中查找
+
+## Global State Management
+
+### Consolidating State Logic with a Reducer
+
+Reducer : A function that allows us to centralize state updates in a component.
+
+### Sharing State using React Context
+
+React Context : Allows sharing data without passing it down through many components in the middle.
+
+### Inspecting Stores with Zustand DevTools
+
+`npm i npm i simple-zustand-devtools`
+
+`npm i -D @types/node`
