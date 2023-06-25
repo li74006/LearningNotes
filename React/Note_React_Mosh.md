@@ -1387,3 +1387,9 @@ React Context : Allows sharing data without passing it down through many compone
 `npm i npm i simple-zustand-devtools`
 
 `npm i -D @types/node`
+
+## Routing with React Router
+
+### Setting Up Routing
+
+`npm i react-router-dom`
