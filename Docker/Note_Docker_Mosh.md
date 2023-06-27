@@ -152,6 +152,8 @@
 
 `echo DB_USER=ohcysp >> .bashrc` : 在 .bashre 文件中添加 DB_USER=ohcysp。不要把敏感信息记录在环境变量中！
 
+`docker start -i xxxContainer-ID` : 根据容器 ID 启动某个容器。
+
 `source ~/.bashrc` : 重载 .bashrc 文件，因为环境变量只会在启动终端的时候加载一次，修改后需要重启终端或者重新加载 .bashrc 才能刷新修改后的环境变量。
 
 ### Managing Processes
@@ -195,3 +197,191 @@ Groups : 同一组内的用户，拥有相同的权限。
 `chmod u+0 xxxname.sh` : 为所有用户添加该文件的执行权限。
 
 `chmod og+x+w-r *.sh` : 为所有组添加 .sh 文件的执行、写并移除读的权限。
+
+## Building Images
+
+### Images and Containers
+
+Image 包含：
+
+- A cut-down OS
+- Thrid-party libtaties
+- Application files
+- Enviornment variables
+  ...
+
+Container :
+
+- Provides on isolated enviornment
+- Can be stopped & restared
+- Is just a process
+
+### Dockerfile Instructions
+
+Dockerfile :
+
+- FROM : 指定 Base Image
+- WORKDIR : 指定工作目录,接下来的命令都会在该目录下进行
+- COPY : 把当前路径下的文件或目录复制到 image 中
+- ADD : 和 COPY 相同，但是可以添加网络资源和自动解压压缩文件
+- RUN : 执行操作系统命令
+- ENV : 设置环境变量
+- EXPOSE : 配置容器端口
+- USER : 指定运行应用的用户
+- CMD : 指定启动容器需要的命令
+- ENTRYPOINT : 指定启动容器需要的命令
+
+### Choosing the Right Base Image
+
+Dockerfile:
+
+```Dockerfile
+FROM node:18.16.1-alpine3.17
+WORKDIR /app
+COPY . .
+```
+
+`docker build -t docker-react-app .`
+
+`docker image ls` : 查看本地 docker image
+
+`docker run -it docker-react-app` : 会进入 node 环境中。
+
+`docker run -it docker-react-app sh ` ：因为 alpine linux 没有 bash，所以这里用 shell。
+
+### Copying Files and Directories
+
+如果把 windows os 项目中的 node_modules 也添加到 docker image 中，会报 bug，因为 win he linux 的 node_modules 不兼容，所以得排除 node_modules 的添加，然后在容器中重新 npm install 。
+
+### Excluding Files and Directories
+
+.dockerignore:
+
+```dockerignore
+node_modules
+```
+
+### Running Commands
+
+```Dockerfile
+FROM node:18.16.1-alpine3.17
+WORKDIR /app
+COPY . .
+RUN npm install
+```
+
+### Setting Env Variables
+
+```Dockerfile
+FROM node:18.16.1-alpine3.17
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_UPL=http://api.myapp.com/
+EXPOSE 5173
+```
+
+### Setting the User
+
+`addgroup app` ：创建一个叫 app 的组
+
+`adduser -S -G app app` : 在 app 组中，创建一个名叫 app 的系统用户
+
+`groups app` : 查看 app 组中用户
+
+```dockerfile
+FROM node:18.16.1-alpine3.17
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_UPL=http://api.myapp.com/
+EXPOSE 5173
+RUN addgroup app && adduser -S -G app app
+USER app # 接下来所有的命令都会由 app 输入执行
+```
+
+### Defining Entrypoints
+
+```dockerfile
+FROM node:18.16.1-alpine3.17
+RUN addgroup app && adduser -S -G app app
+USER app # 接下来所有的命令都会由 app 输入执行
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_UPL=http://api.myapp.com/
+EXPOSE 5173
+
+# Shell form
+CMD npm run xxx
+
+# Exec form 一般用这种方式，系统直接执行命令，不会再开个 shell 或者啥执行
+CMD ["npm", "start"]
+
+# 这样不会在执行 docker run xxx npm run dev 时覆盖上面的 CMD 命令
+# 如果想覆盖 entrypoint 要这样 ：docker run xxx --entrypoint npm run dev
+ENTRYPOINT ["npm", "start"]
+```
+
+先创建用户，否则没有权限执行相应文件。
+
+RUN 是在 build image 时候执行的，比如说 npm install。
+
+CMS 是在容器的 runtime 执行。
+
+### Speeding Up Builds
+
+Dockerfile
+
+```dockerfile
+FROM node:18.16.1-alpine3.17
+RUN addgroup app && adduser -S -G app app
+USER app
+WORKDIR /app
+
+# 先把 package*.json 加到镜像中，然后 npm i ，然后再将所有文件加到 image 中，这样两边 node_mudules 目录结构都一样，就不用重新 i 一遍 package 了，直接用之前 docker 的 layer 就行
+COPY package*.json .
+RUN npm install
+COPY . .
+ENV API_UPL=http://api.myapp.com/
+EXPOSE 5173
+# CMD npm run dev
+# CMD ["npm", "run", "dev"]
+
+# ENTRYPOINT ["npm", "run", "dev"]
+```
+
+### Removing Images
+
+`docker iamge prune` : 修剪 docker image
+
+`docker container prune`
+
+`docker image rm xxxName`
+
+### Tagging Images
+
+`docker build -t docker-react-app:1 .`
+
+`docker image remove docker-react-app:1`
+
+`docker image tag docker-react-app:1 dock-react-app:1.0.1`
+
+`docker image tag xxxName:xxx`
+
+### Sharing Images
+
+1. 登录 Docker Hub
+2. 创建一个仓库
+3. docker login
+4. docker push xxxxxx
+
+### Saving and Loading Images
+
+`docker image save -o docker-react-app.tar docker-react-app:3`
+
+`docker image load -i docker-react-app.tar`
+
+## Working with Containers
+
+###
