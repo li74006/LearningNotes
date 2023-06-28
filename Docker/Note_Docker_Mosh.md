@@ -43,6 +43,8 @@
 
 `apt install nano`
 
+`apk add vim`
+
 3. 删除某个包。
 
 `apt remove nano`
@@ -399,3 +401,340 @@ EXPOSE 5173
 ### Publishing Ports
 
 `docker run -d -p 3000:5173 --name c1 docker-react-app` : 把本机的 3000 端口连给容器的 5173 端口（-p port）
+
+package.json 中，需要 --host 暴露一下，才能在宿主机访问 5173。
+
+### Excuting Command in Running Containers
+
+`docker exec c1 ls`
+
+`docker exec -it c1 sh` : 在打开的这个终端中，即使 exit 了，容器还是会在后台运行。
+
+### Stopping and Starting Containers
+
+`docker stop c1`
+
+`docker start c1`
+
+`docker run` 是运行一个新的容器，`docker start` 是运行一个已有容器。
+
+### Removing Containers
+
+`docker container rm c1` 或 `docker rm c1` 或 `docker rm -f c1 ` 可以强制删除运行中的容器 ( -f force)
+
+### Persisting Data with Volumes
+
+Volumes : 独立于容器的存储空间
+
+`docker volume create app-data` : 创建一个 volume
+
+`docker volume inspect app-data` : 检查 volume
+
+`docker run -d -p 4000:3000 -v app-data:/app/data docker-react-app` : (-v volume)
+
+Dockerfile
+
+```dockerfile
+FROM node:18.16.1-alpine3.17
+# RUN addgroup app && adduser -S -G app app
+# USER app
+WORKDIR /app
+RUN mkdir data # 这样，当使用 volume 时，就不会产生权限问题，否则上一步 docker 会用 root 用户新建一个 data 文件夹，app 用户就无法操作这个文件夹了
+COPY package*.json .
+RUN npm install
+COPY . .
+ENV API_UPL=http://api.myapp.com/
+EXPOSE 5173
+# CMD npm run dev
+CMD ["npm", "run", "dev"]
+
+# ENTRYPOINT ["npm", "run", "dev"]
+```
+
+### Copying Files between the Host and Container
+
+`docker cp xxxContainer-ID:/app/log.txt .` : 从容器中复制出来
+
+`docker cp secret.txt xxxContainer-ID:/app` : 从本地复制到容器中
+
+### Sharing the Source Code with Container
+
+`docker run -d -p 3000:3000 -v $(pwd):/app docker-react-app` : 将本地文件夹和容器文件夹映射到一块，实现本低修改后，映射的容器文件夹内容随之修改（$(pwd) 会打印当前的工作目录地址）
+
+## Running Multi-container Applications
+
+### Install Docker Compose
+
+win 在装 docker 的时候已经给装好了
+
+`docker image rm -f $(docker image ls -a -q)` : 通过 image id 列表，删除所有 image
+
+`docker container rm -f $(docker container ls -a -q)` : 通过 container id 列表，删除所有 container
+
+### The Sample Web Application
+
+`docker-compose up`
+
+### JSON and YAML Formats
+
+.yaml/.yml 一般用作为配置文件，.json 一般用于交换数据。
+
+### Creating a Compose
+
+docker-compose.yml
+
+```yml
+version: "3.8"
+
+services:
+  web:
+    build: ./fronted
+    ports:
+      - 3000:3000
+  api:
+    build: ./backend
+    ports:
+      - 3001:3001
+    enviornment:
+      # - DB_URL=mongodb://db/paperSack  # 或 👇
+      DB_URL:mongodb://db/paperSack
+  db:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volume:
+      - paperSack: /data/db # 该路径是 mongodb 的默认数据存储位置
+
+  volumes:
+    paperSack:
+```
+
+### Building Images
+
+`docker-compose build`
+
+`docker-compose build --no-cache` : 强制重新构建，不使用之前的 layer
+
+### Starting and Stopping the Application
+
+`docker-compose up --build` : 先 build 再启动
+
+`docker-compose up -d` : 后台启动
+
+`docker-compose down` : 停止并移除容器
+
+### Docker Networking
+
+当运行 docker-compose 时，docker 会自动创建一个网络，并把容器都放到该网络下，方便其之间信息交互。
+
+所以可以 `ping api`
+
+`ifconfig` 查看容器 ip 地址
+
+### Viewing Logs
+
+`docker-compose logs`
+
+`docker-compose xxxContainer-ID -f` (-f follow)
+
+### Publishing Changes
+
+docker-compose.yml
+
+```yml
+version: "3.8"
+
+services:
+  web:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+  api:
+    build: ./backend
+    ports:
+      - 3001:3001
+    enviornment:
+      # - DB_URL=mongodb://db/paperSack  # 或 👇
+      DB_URL:mongodb://db/paperSack
+    volumes:
+      - ./backend:/app
+  db:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volume:
+      - paperSack: /data/db # 该路径是 mongodb 的默认数据存储位置
+
+  volumes:
+    paperSack:
+```
+
+### Migrating the Database
+
+docker-compose.yml
+
+```yml
+version: "3.8"
+
+services:
+  web:
+    build: ./fronted
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+  api:
+    build: ./backend
+    ports:
+      - 3001:3001
+    enviornment:
+      # - DB_URL=mongodb://db/paperSack  # 或 👇
+      DB_URL:mongodb://db/paperSack
+    volumes:
+      - ./backend:/app
+    command: ./wait-for db:27017 && migrate-mongo up && npm start # 等待 db 启动后，迁移 db 数据，然后再启动 server
+  db:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volume:
+      - paperSack: /data/db # 该路径是 mongodb 的默认数据存储位置
+
+  volumes:
+    paperSack:
+```
+
+### Running Test
+
+```yml
+web-test:
+  image: vidly_web
+  volumes:
+    - ./frontend:/app
+  command: npm test
+```
+
+## Deploying Applications
+
+### Getting a Virtual Machine(VPS)
+
+Mosh 用的 Digital Ocean。
+我用 AWS ~
+
+### Install Docker Machine
+
+Docker Machine : 用于 开发端 和 VPS 上的 docker engine 交互信息。
+
+`curl xxxxxx` : 上官网自己找命令。
+
+### Provisioning a Host
+
+`docker-machine create --driver digitalocean --digitalocean-access-token xxxxToken vidly`
+
+### Connecting to the Host
+
+`docker-machine ls`
+
+`docker-machine ssh paperSack` : 这样就能直接登录 VPS
+
+### Defining the Production Configuration
+
+要新建一个生产环境下的 docker-compose 配置文件
+
+docker-compose.prod.yml
+
+```yml
+version: "3.8"
+
+services:
+  web:
+    build: ./frontend
+    ports:
+      - 80:3000
+    restart: unless-stopped # 如果不手动停止，就会自动重启
+
+  api:
+    build: ./backend
+    ports:
+      - 3001:3001
+    enviornment:
+      # - DB_URL=mongodb://db/paperSack  # 或 👇
+      DB_URL:mongodb://db/paperSack
+    command: ./wait-for db:27017 && migrate-mongo up && npm start # 等待 db 启动后，迁移 db 数据，然后再启动 server
+    restart: unless-stopped
+
+  db:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volume:
+      - paperSack: /data/db # 该路径是 mongodb 的默认数据存储位置
+    restart: unless-stopped
+
+  volumes:
+    paperSack:
+```
+
+### Reducing the Image Size
+
+/frontend/Dockerfile.prod
+
+```dockerfile
+# Setp 1 : Build stage
+FROM node:14.16.0-alpine3.13 AS build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Step 2 : Production
+FROM nginx:1.12-alpine
+RUN addgroup && adduser -S -G app app
+USER app
+COPY --from=build-stage /app/build/usr/share/nginx/html
+EXPOSE 80
+ENTRYPOINT ["nginx", "-g", "daemon off;"] # daemon off : 守护进程
+```
+
+docker-compose.prod.yml
+
+```yml
+web:
+  build:
+    context: ./frontend
+    docker: Dockerfile.prod
+    ports:
+      - 80:80
+```
+
+`docker-compose -f docker-compose.prod.yml build`（-f file）
+
+### Deploying the Application
+
+`docker-machine env paperSack` : 查看应用的环境变量
+
+`docker-compose -f docker-compose.prod.yml up -d`
+
+`RUN mkdir /app && chown `
+
+### Troubleshooting Deployment Issues
+
+用户权限会导致 nginx 无法运行。
+
+别忘了改前端框架中生产环境中的 api 地址：
+
+/frontend/Dockerfile.prod
+
+```dockerfile
+...
+RUN npm install
+COPY . .
+ENV REACT_APP_API_URL=http://123.123.123.123:3001/api # 自己云服务器的地址
+RUN npm run build
+...
+```
+
+### Publishing Changes
