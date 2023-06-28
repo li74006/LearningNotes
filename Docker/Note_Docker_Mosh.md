@@ -738,3 +738,17 @@ RUN npm run build
 ```
 
 ### Publishing Changes
+
+可以在 docker-compose.prod.yml 中添加 image tag
+
+```yml
+web:
+  image: paperSack_web:1
+  build:
+    context: ./frontend
+    docker: Dockerfile.prod
+    ports:
+      - 80:80
+```
+
+有自动管理 image 版本的工具，需要自己学了就 ~ 听完了，开心！😊🎉
