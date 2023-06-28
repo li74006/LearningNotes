@@ -384,4 +384,18 @@ EXPOSE 5173
 
 ## Working with Containers
 
-###
+### Staring Containers
+
+`docker run -d docker-react-app` : 后台启动容器（ -d detach），这样之后就能进入该容器输命令了
+
+`docker run -d --name blue-sky docker-react-app` : 为启动的容器命名
+
+`docker logs xxxContain-ID` : 查看某个容器日志
+
+`docker logs -f xxxContain-ID` : 实时查看容器输出日志
+
+`docker logs -n <行数> -t xxxContain-ID` : 查看自定义最后几行的日志（ -t 显示时间戳）
+
+### Publishing Ports
+
+`docker run -d -p 3000:5173 --name c1 docker-react-app` : 把本机的 3000 端口连给容器的 5173 端口（-p port）
