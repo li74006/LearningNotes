@@ -1,15 +1,6 @@
 function kidsWithCandies(candies: number[], extraCandies: number): boolean[] {
-  let greatestKids: boolean[] = [];
-  let max = 0;
-  for (let i in candies) {
-    if (candies[i] > candies[i + 1]) {
-      max = candies[i];
-    } else {
-      max = candies[i + 1];
-    }
-  }
-
-  return greatestKids;
+  const max = Math.max(...candies);
+  return Array.from(candies, (candie) => (candie + extraCandies >= max ? true : false));
 }
 
-console.log(kidsWithCandies([1, 2, 3, 1], 10));
+console.log(kidsWithCandies([1, 2, 3, 1], 1));
