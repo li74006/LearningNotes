@@ -12,14 +12,14 @@ function canPlaceFlowers(flowerbed: number[], n: number): boolean {
       blockNum++;
     } else {
       if (blockNum >= 3) {
-        let canBlockPlace = blockNum % 2 === 0 ? blockNum / 2 - 1 : Math.floor(blockNum / 2);
+        let canBlockPlace = blockNum % 2 === 0 ? blockNum - 2 : blockNum - 1;
         canPlaceTotal += canBlockPlace;
       }
       blockNum = 0;
     }
   }
 
-  return canPlaceTotal >= n;
+  return canPlaceTotal / 2 >= n;
 }
 
 console.log(canPlaceFlowers([1, 0, 0, 0, 1], 1));
