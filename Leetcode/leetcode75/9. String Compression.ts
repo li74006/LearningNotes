@@ -1,31 +1,27 @@
 function compress(chars: string[]): number {
-  let countChar: any = {};
   let afterCompress = "";
+  let count = 1;
 
-  for (let char of chars) {
-    if (!countChar[char]) {
-      countChar[char] = 1;
+  for (let char in chars) {
+    if (parseInt(char) === 0) {
+      afterCompress += chars[char];
+    } else if (chars[char] === chars[parseInt(char) - 1]) {
+      count++;
     } else {
-      countChar[char]++;
+      if (count === 1) afterCompress += chars[parseInt(char)];
+      else afterCompress += count + chars[parseInt(char)];
+      count = 1;
     }
   }
 
-  for (let [k, v] of Object.entries(countChar)) {
-    if (v === 1) {
-      afterCompress += k;
-    } else {
-      afterCompress += k + v;
-    }
-  }
+  if (count !== 1) afterCompress += count;
 
-  let array = [...afterCompress];
+  const final = [...afterCompress];
+  chars.splice(0, chars.length, ...final);
 
-  for (let i in array) {
-    chars[i] = array[i];
-  }
-  chars.splice(array.length);
   console.log(chars);
-  return chars.length;
+
+  return final.length;
 }
 
 console.log(compress(["a", "a", "b", "b", "c", "c", "c"]));
