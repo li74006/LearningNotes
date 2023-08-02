@@ -38,23 +38,20 @@
 //   return max;
 // }
 
-console.log(longestOnes([0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1], 3));
+console.log(longestOnes([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2));
 
+// 神仙解法
 function longestOnes(nums: number[], k: number): number {
   let i = 0,
     what = 0;
 
   for (; i < nums.length; i++) {
-    console.log("次数++++++++++++++++++:", i, "当前:", nums[i], "k:", k);
     if (nums[i] === 0) k--;
-    console.log("k~~~~~~~~~~~~~~~~~~~~~", k);
 
     if (k < 0) {
       if (nums[what] === 0) k++;
       what++;
-      console.log("if22:", "k:", k, "what:", what);
     }
-    console.log("for:", "k:", k, "what:", what, "i:", i);
   }
 
   return i - what;
