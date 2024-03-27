@@ -4,6 +4,8 @@ import NavBar from "./state-management/NavBar";
 import AuthProvider from "./state-management/auth/AuthProvider";
 import { TasksProvider } from "./state-management/tasks";
 import Counter from "./state-management/counter/Counter";
+import TodoList from "./react-query/TodoList";
+import TodoForm from "./react-query/TodoForm";
 
 function App() {
   return (

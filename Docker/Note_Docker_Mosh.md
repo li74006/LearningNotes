@@ -128,7 +128,7 @@
 
 `mkdir test; cd test; echo done`
 
-上一条命令中，如果已经存在 test 文件夹，那么不会新建 test 文件夹，而后会执行 后梁步命令。
+上一条命令中，如果已经存在 test 文件夹，那么不会新建 test 文件夹，而后会执行 后两步命令。
 
 `mkdir test && cd test && echo done` : 这种命令下，如果已经存在 test 文件夹，那么后续的命令将不会执行。
 
@@ -188,7 +188,7 @@ Groups : 同一组内的用户，拥有相同的权限。
 
 `groupadd developers` : 添加新的组。
 
-`cat /etc/group` : 产看组。
+`cat /etc/group` : 查看组。
 
 `usermod -G developers john`
 
