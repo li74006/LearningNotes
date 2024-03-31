@@ -110,7 +110,7 @@
 
 `cat file1.txt file2.txt > combined.txt` : 文件 1、2 中的内容复制到 combined 中。
 
-`ehco hello > hello.txt` : 创建了毅哥内容是 hello 的 hello.txt 文件。
+`ehco hello > hello.txt` : 创建了一个内容是 hello 的 hello.txt 文件。
 
 `ls -l /etc > list.txt`
 
