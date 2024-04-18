@@ -459,7 +459,7 @@ CMD ["npm", "run", "dev"]
 
 ### Sharing the Source Code with Container
 
-`docker run -d -p 3000:3000 -v $(pwd):/app docker-react-app` : 将本地文件夹和容器文件夹映射到一块，实现本低修改后，映射的容器文件夹内容随之修改（$(pwd) 会打印当前的工作目录地址）
+`docker run -d -p 3000:3000 -v $(pwd):/app docker-react-app` : 将本地文件夹和容器文件夹映射到一块，实现本地修改后，映射的容器文件夹内容随之修改（$(pwd) 会打印当前的工作目录地址）
 
 ## Running Multi-container Applications
 
@@ -488,7 +488,7 @@ version: "3.8"
 
 services:
   web:
-    build: ./fronted
+    build: ./frontend
     ports:
       - 3000:3000
   api:
